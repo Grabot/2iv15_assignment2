@@ -6,7 +6,7 @@ class Solver
 public:
 	Solver(int a_NumCells, float a_Viscosity, float a_Dt);
 
-	void velStep();
+	void velStep(float u[], float v[], float u0[], float v0[] );
 	void AddField(float x[], float s[] );
 
 	int m_NumCells;

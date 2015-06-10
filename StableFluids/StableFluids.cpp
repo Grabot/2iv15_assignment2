@@ -299,7 +299,7 @@ static void reshape_func ( int width, int height )
 static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
-	solver->velStep();
+	solver->velStep(u, v, u_prev, v_prev);
 	//VelocityField->TimeStep( PrevVelocityField, VelocityField );
 	//DensityField->TimeStep( PrevDensityField, VelocityField );
 	
