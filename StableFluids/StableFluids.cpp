@@ -1,6 +1,7 @@
 // StableFluids.cpp : Defines the entry point for the console application.
 //
-
+#include <iostream>
+using namespace std;
 #include "ScalarField.h"
 #include "VectorField.h"
 #include "Solver.h"
@@ -31,6 +32,8 @@ float *dens_prev;
 static int dvel;
 static int dump_frames;
 static int frame_number;
+long long level_elapsed_time = 0;
+long long level_start_time = 0;
 
 static VectorField *VelocityField, *PrevVelocityField;
 static ScalarField *DensityField, *PrevDensityField;
@@ -121,22 +124,17 @@ static void pre_display ( void )
 
 static void post_display ( void )
 {
-	// Write frames if necessary.
-	if (dump_frames) {
-		const int FRAME_INTERVAL = 4;
-		if ((frame_number % FRAME_INTERVAL) == 0) {
-			const unsigned int w = glutGet(GLUT_WINDOW_WIDTH);
-			const unsigned int h = glutGet(GLUT_WINDOW_HEIGHT);
-			unsigned char * buffer = (unsigned char *) malloc(w * h * 4 * sizeof(unsigned char));
-			if (!buffer)
-				exit(-1);
-			// glRasterPos2i(0, 0);
-			glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-			char filename[13];
-			sprintf(filename, "img%.5i.png", frame_number / FRAME_INTERVAL);
-			printf("Dumped %s.\n", filename);
-			saveImageRGBA(filename, buffer, w, h);
-		}
+	level_elapsed_time = timeGetTime();
+	while (!(((level_elapsed_time - level_start_time) % 17) == 0))
+	{
+		level_elapsed_time = timeGetTime();
+		Sleep(1);
+	}
+
+	if (((level_elapsed_time - level_start_time) % 1000) <= 16)
+	{
+		cout << "frames per second: " << frame_number << endl;
+		frame_number = 0;
 	}
 	frame_number++;
 
@@ -161,7 +159,8 @@ static void draw_velocity ( void )
 			y = (j-0.5f)*h;
 
 			glVertex2f ( x, y );
-			glVertex2f ( x+(*VelocityField)[IX(i,j)][0], y+(*VelocityField)[IX(i,j)][1] );
+			glVertex2f(x + u[IX(i, j)], y + v[IX(i, j)]);
+			//glVertex2f ( x+(*VelocityField)[IX(i,j)][0], y+(*VelocityField)[IX(i,j)][1] );
 		}
 	}
 
@@ -182,10 +181,10 @@ static void draw_density ( void )
 		for ( j=0 ; j<=N ; j++ ) {
 			y = (j-0.5f)*h;
 
-			d00 = (*DensityField)[IX(i,j)];
-			d01 = (*DensityField)[IX(i,j+1)];
-			d10 = (*DensityField)[IX(i+1,j)];
-			d11 = (*DensityField)[IX(i+1,j+1)];
+			d00 = dens[IX(i, j)];
+			d01 = dens[IX(i, j + 1)];
+			d10 = dens[IX(i + 1, j)];
+			d11 = dens[IX(i + 1, j + 1)];
 
 			glColor3f ( d00, d00, d00 ); glVertex2f ( x, y );
 			glColor3f ( d10, d10, d10 ); glVertex2f ( x+h, y );
@@ -203,13 +202,13 @@ relates mouse movements to forces sources
 ----------------------------------------------------------------------
 */
 
-static void get_from_UI( float d_p[], float u_p[], float v_p[],  ScalarField * d, VectorField * u_v )
+static void get_from_UI( float d[], float u[], float v[] )
 {
 	int i, j, size = (N+2)*(N+2);
 
 	for ( i=0 ; i<size ; i++ ) {
-		u_p[i] = v_p[i] = d_p[i] = 0.0f;
-		(*u_v)[i][0] = (*u_v)[i][1] = (*d)[i] = 0.0f;
+		u[i] = v[i] = d[i] = 0.0f;
+		//(*u_v)[i][0] = (*u_v)[i][1] = (*d)[i] = 0.0f;
 	}
 
 	if ( !mouse_down[0] && !mouse_down[2] ) return;
@@ -220,12 +219,15 @@ static void get_from_UI( float d_p[], float u_p[], float v_p[],  ScalarField * d
 	if ( i<1 || i>N || j<1 || j>N ) return;
 
 	if ( mouse_down[0] ) {
-		(*u_v)[IX(i,j)][0] = force * (mx-omx);
-		(*u_v)[IX(i,j)][1] = force * (omy-my);
+		u[IX(i, j)] = force*(mx - omx);
+		v[IX(i, j)] = force*(omy - my);
+		//(*u_v)[IX(i,j)][0] = force * (mx-omx);
+		//(*u_v)[IX(i,j)][1] = force * (omy-my);
 	}
 
 	if ( mouse_down[2] ) {
-		(*d)[IX(i,j)] = source;
+		d[IX(i, j)] = source;
+		//(*d)[IX(i,j)] = source;
 	}
 
 	omx = mx;
@@ -296,9 +298,10 @@ static void reshape_func ( int width, int height )
 
 static void idle_func ( void )
 {
-	get_from_UI( dens_prev, u_prev, v_prev, PrevDensityField, PrevVelocityField );
-	VelocityField->TimeStep( PrevVelocityField, VelocityField );
-	DensityField->TimeStep( PrevDensityField, VelocityField );
+	get_from_UI( dens_prev, u_prev, v_prev );
+	solver->velStep();
+	//VelocityField->TimeStep( PrevVelocityField, VelocityField );
+	//DensityField->TimeStep( PrevDensityField, VelocityField );
 	
 	glutSetWindow ( win_id );
 	glutPostRedisplay ();
@@ -337,6 +340,8 @@ static void open_glut_window ( void )
 	glutSwapBuffers ();
 
 	pre_display ();
+
+	level_start_time = timeGetTime();
 
 	glutKeyboardFunc ( key_func );
 	glutMouseFunc ( mouse_func );

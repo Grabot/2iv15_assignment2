@@ -1,3 +1,5 @@
+#include <iostream>
+using namespace std;
 #include "Solver.h"
 
 #define CREATE_DIM1 (new Vec2f[(a_NumCells+2)*(a_NumCells+2)])
@@ -10,6 +12,10 @@ Solver::Solver(int a_NumCells, float a_Viscosity, float a_Dt)
 	{
 		m_Field[i][0] = m_Field[i][1] = 0.f;
 	}
+}
+
+void Solver::velStep()
+{
 }
 
 void Solver::AddField(float x[], float s[] )
