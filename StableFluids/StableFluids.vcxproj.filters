@@ -21,13 +21,7 @@
     <ClCompile Include="imageio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScalarField.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StableFluids.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VectorField.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Solver.cpp">
@@ -39,12 +33,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="imageio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ScalarField.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VectorField.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Solver.h">
