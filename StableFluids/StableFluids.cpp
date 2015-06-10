@@ -28,7 +28,7 @@ float *v_prev;
 float *dens;
 float *dens_prev;
 float *object;
-float gravity = -0.01f;
+int buttonW = 0;
 static int dvel;
 static int dump_frames;
 static int frame_number;
@@ -61,7 +61,7 @@ static void clear_data ( void )
 
 	for (int i = 0; i < size; i++)
 	{
-		u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = 0.0f;
+		u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = object[i] = 0.0f;
 	}
 }
 
@@ -76,6 +76,7 @@ static int allocate_data ( void )
 	v_prev = new float[size];
 	dens = new float[size];
 	dens_prev = new float[size];
+	object = new float[size];
 
 	FieldToolbox::Create();
 	return ( 1 );
@@ -117,18 +118,40 @@ static void post_display ( void )
 	glutSwapBuffers ();
 }
 
-void apply_gravity()
+static void draw_object(void)
 {
 	int i, j;
-	for (i = 0; i <= N + 1; i++)
+	float x1, x2, y1, y2, h;
+
+	h = 1.0f / N;
+
+	glColor3f(1.0f, 1.0f, 0.0f);
+	glLineWidth(1.0f);
+
+	glBegin(GL_QUADS);
+
+	for (i = 1; i <= N; i++)
 	{
-		for (j = 0; j <= N + 1; j++)
+		x1 = (i - 0.5f) * h;
+		x2 = (i + 0.5f) * h;
+		for (j = 1; j <= N; j++)
 		{
-			v[IX(i, j)] = gravity;
+			y1 = (j - 0.5f) * h;
+			y2 = (j + 0.5f) * h;
+
+			if (object[IX(i, j)] == 1)
+			{
+				glColor3f(1.0f, 1.0f, 0.0f);
+
+				glVertex2f(x1 - 1 * h, y1 - 1 * h);
+				glVertex2f(x1 + 1 * h, y1 - 1 * h);
+				glVertex2f(x1 + 1 * h, y1 + 1 * h);
+				glVertex2f(x1 - 1 * h, y1 + 1 * h);
+			}
 		}
 	}
+	glEnd();
 }
-
 static void draw_velocity ( void )
 {
 	int i, j;
@@ -209,9 +232,15 @@ static void get_from_UI( float d[], float u[], float v[] )
 		v[IX(i, j)] = force*(omy - my);
 	}
 
-	if ( mouse_down[2] ) {
+	if (mouse_down[2] && buttonW == 1)
+	{
+		object[IX(i, j)] = 1;
+	}
+
+	if ( mouse_down[2] && buttonW == 0 ) {
 		d[IX(i, j)] = source;
 	}
+
 
 	omx = mx;
 	omy = my;
@@ -229,6 +258,16 @@ static void key_func ( unsigned char key, int x, int y )
 {
 	switch ( key )
 	{
+	case 'w':
+	case 'W':
+		buttonW = 1;
+		break;
+
+	case 'e':
+	case 'E':
+		buttonW = 0;
+		break;
+
 	case 'c':
 	case 'C':
 		clear_data ();
@@ -282,9 +321,8 @@ static void reshape_func ( int width, int height )
 static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
-	apply_gravity();
-	solver->velStep(u, v, u_prev, v_prev);
-	solver->densStep(dens, dens_prev, u, v);
+	solver->velStep(u, v, u_prev, v_prev, object);
+	solver->densStep(dens, dens_prev, u, v, object);
 	
 	glutSetWindow ( win_id );
 	glutPostRedisplay ();
@@ -294,8 +332,15 @@ static void display_func ( void )
 {
 	pre_display ();
 
-	if ( dvel ) draw_velocity ();
-	else		draw_density ();
+	if (dvel)
+	{
+		draw_velocity();
+	}
+	else
+	{
+		draw_density(); 
+		draw_object();
+	}
 	
 
 	post_display ();
