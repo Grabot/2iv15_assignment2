@@ -3,6 +3,7 @@
 
 #include "ScalarField.h"
 #include "VectorField.h"
+#include "Solver.h"
 #include "FieldToolbox.h"
 #include "imageio.h"
 
@@ -21,12 +22,19 @@
 static int N;
 static float dt, diff, visc;
 static float force, source;
+float *u;
+float *v;
+float *u_prev;
+float *v_prev;
+float *dens;
+float *dens_prev;
 static int dvel;
 static int dump_frames;
 static int frame_number;
 
 static VectorField *VelocityField, *PrevVelocityField;
 static ScalarField *DensityField, *PrevDensityField;
+Solver *solver;
 
 static int win_id;
 static int win_x, win_y;
@@ -43,6 +51,7 @@ free/clear/allocate simulation data
 
 static void free_data ( void )
 {
+
 	if( VelocityField ) delete ( VelocityField );
 	if( PrevVelocityField ) delete ( PrevVelocityField );
 	if( DensityField ) delete ( DensityField );
@@ -51,7 +60,13 @@ static void free_data ( void )
 
 static void clear_data ( void )
 {
-	int i, size=(N+2)*(N+2);
+
+	int i, size = (N + 2)*(N + 2);
+
+	for (int i = 0; i < size; i++)
+	{
+		u[i] = v[i] = u_prev[i] = v_prev[i] = 0.0f;
+	}
 
 	for ( i=0 ; i<size ; i++ ) {
 		(*VelocityField)[i][0] = (*VelocityField)[i][1] = 0.0f;
@@ -63,6 +78,16 @@ static void clear_data ( void )
 
 static int allocate_data ( void )
 {
+	solver = new Solver(N, visc, dt);
+	int size = (N + 2) * (N + 2);
+
+	u = new float[size];
+	v = new float[size];
+	u_prev = new float[size];
+	v_prev = new float[size];
+	dens = new float[size];
+	dens_prev = new float[size];
+
 	FieldToolbox::Create();
 	VelocityField	  = new VectorField(N, visc, dt);
 	PrevVelocityField = new VectorField(N, visc, dt);
@@ -178,11 +203,12 @@ relates mouse movements to forces sources
 ----------------------------------------------------------------------
 */
 
-static void get_from_UI( ScalarField * d, VectorField * u_v )
+static void get_from_UI( float d_p[], float u_p[], float v_p[],  ScalarField * d, VectorField * u_v )
 {
 	int i, j, size = (N+2)*(N+2);
 
 	for ( i=0 ; i<size ; i++ ) {
+		u_p[i] = v_p[i] = d_p[i] = 0.0f;
 		(*u_v)[i][0] = (*u_v)[i][1] = (*d)[i] = 0.0f;
 	}
 
@@ -270,7 +296,7 @@ static void reshape_func ( int width, int height )
 
 static void idle_func ( void )
 {
-	get_from_UI( PrevDensityField, PrevVelocityField );
+	get_from_UI( dens_prev, u_prev, v_prev, PrevDensityField, PrevVelocityField );
 	VelocityField->TimeStep( PrevVelocityField, VelocityField );
 	DensityField->TimeStep( PrevDensityField, VelocityField );
 	

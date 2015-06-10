@@ -91,6 +91,7 @@
     <ClCompile Include="FieldToolbox.cpp" />
     <ClCompile Include="imageio.cpp" />
     <ClCompile Include="ScalarField.cpp" />
+    <ClCompile Include="Solver.cpp" />
     <ClCompile Include="StableFluids.cpp" />
     <ClCompile Include="VectorField.cpp" />
   </ItemGroup>
@@ -98,6 +99,7 @@
     <ClInclude Include="FieldToolbox.h" />
     <ClInclude Include="imageio.h" />
     <ClInclude Include="ScalarField.h" />
+    <ClInclude Include="Solver.h" />
     <ClInclude Include="VectorField.h" />
   </ItemGroup>
   <ItemGroup>
