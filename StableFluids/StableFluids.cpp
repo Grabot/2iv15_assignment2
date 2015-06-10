@@ -27,6 +27,8 @@ float *u_prev;
 float *v_prev;
 float *dens;
 float *dens_prev;
+float *object;
+float gravity = -0.01f;
 static int dvel;
 static int dump_frames;
 static int frame_number;
@@ -115,6 +117,18 @@ static void post_display ( void )
 	glutSwapBuffers ();
 }
 
+void apply_gravity()
+{
+	int i, j;
+	for (i = 0; i <= N + 1; i++)
+	{
+		for (j = 0; j <= N + 1; j++)
+		{
+			v[IX(i, j)] = gravity;
+		}
+	}
+}
+
 static void draw_velocity ( void )
 {
 	int i, j;
@@ -193,13 +207,10 @@ static void get_from_UI( float d[], float u[], float v[] )
 	if ( mouse_down[0] ) {
 		u[IX(i, j)] = force*(mx - omx);
 		v[IX(i, j)] = force*(omy - my);
-		//(*u_v)[IX(i,j)][0] = force * (mx-omx);
-		//(*u_v)[IX(i,j)][1] = force * (omy-my);
 	}
 
 	if ( mouse_down[2] ) {
-		int index = IX(i, j);
-		d[index] = source;
+		d[IX(i, j)] = source;
 	}
 
 	omx = mx;
@@ -271,6 +282,7 @@ static void reshape_func ( int width, int height )
 static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
+	apply_gravity();
 	solver->velStep(u, v, u_prev, v_prev);
 	solver->densStep(dens, dens_prev, u, v);
 	
