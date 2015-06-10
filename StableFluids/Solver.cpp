@@ -18,6 +18,34 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[])
 {
 	AddField(u, u0);
 	AddField(v, v0);
+
+	float *temp;
+	temp = u0;
+	u0 = u;
+	u = temp;
+
+	Diffuse(1, u, u0);
+
+	temp = v0;
+	v0 = v;
+	v = temp;
+
+	Diffuse(2, v, v0);
+
+	project(u, v, u0, v0);
+
+	temp = u0;
+	u0 = u;
+	u = temp;
+
+	temp = v0;
+	v0 = v;
+	v = temp;
+
+	advect(1, u, u0, u0, v0);
+	advect(2, v, v0, u0, v0);
+	project(u, v, u0, v0);
+
 }
 
 void Solver::densStep(float x[], float x0[], float u[], float v[])
@@ -29,6 +57,68 @@ void Solver::densStep(float x[], float x0[], float u[], float v[])
 	x0 = x;
 	x = temp;
 	Diffuse(0, x, x0 );
+	temp = x0;
+	x0 = x;
+	x = temp;
+	advect(0, x, x0, u, v);
+}
+
+void Solver::project(float u[], float v[], float p[], float div[])
+{
+
+	for (int i = 1; i <= m_NumCells; i++)
+	{
+		for (int j = 1; j <= m_NumCells; j++)
+		{
+			div[IX_DIM(i, j)] = -0.5f * (u[IX_DIM(i + 1, j)] - u[IX_DIM(i - 1, j)] + v[IX_DIM(i, j + 1)] - v[IX_DIM(i, j - 1)]) / m_NumCells;
+			p[IX_DIM(i, j)] = 0;
+		}
+	}
+	set_bnd(0, div); set_bnd(0, p);
+
+	lin_solve(0, p, div, 1, 4);
+
+	for (int i = 1; i <= m_NumCells; i++)
+	{
+		for (int j = 1; j <= m_NumCells; j++)
+		{
+			u[IX_DIM(i, j)] -= 0.5f * m_NumCells * (p[IX_DIM(i + 1, j)] - p[IX_DIM(i - 1, j)]);
+			v[IX_DIM(i, j)] -= 0.5f * m_NumCells * (p[IX_DIM(i, j + 1)] - p[IX_DIM(i, j - 1)]);
+		}
+	}
+	set_bnd(1, u); 
+	set_bnd(2, v);
+}
+
+void Solver::advect(int b, float d[], float d0[], float u[], float v[])
+{
+	int i0, j0, i1, j1;
+	float x, y, s0, t0, s1, t1, dt0;
+
+	dt0 = m_Dt * m_NumCells;
+	for (int i = 1; i <= m_NumCells; i++)
+	{
+		for (int j = 1; j <= m_NumCells; j++)
+		{
+			x = i - dt0 * u[IX_DIM(i, j)];
+			y = j - dt0 * v[IX_DIM(i, j)];
+			if (x < 0.5f) x = 0.5f;
+			if (x > m_NumCells + 0.5f) x = m_NumCells + 0.5f;
+			i0 = (int)x;
+			i1 = i0 + 1;
+			if (y < 0.5f) y = 0.5f;
+			if (y > m_NumCells + 0.5f) y = m_NumCells + 0.5f;
+			j0 = (int)y;
+			j1 = j0 + 1;
+			s1 = x - i0;
+			s0 = 1 - s1;
+			t1 = y - j0;
+			t0 = 1 - t1;
+			d[IX_DIM(i, j)] = s0 * (t0 * d0[IX_DIM(i0, j0)] + t1 * d0[IX_DIM(i0, j1)]) +
+				s1 * (t0 * d0[IX_DIM(i1, j0)] + t1 * d0[IX_DIM(i1, j1)]);
+		}
+	}
+	set_bnd(b, d);
 }
 
 void Solver::Diffuse(int b, float x[], float x0[])
@@ -74,14 +164,6 @@ void Solver::set_bnd(int b, float x[])
 	x[IX_DIM(0, m_NumCells + 1)] = 0.5f * (x[IX_DIM(1, m_NumCells + 1)] + x[IX_DIM(0, m_NumCells)]);
 	x[IX_DIM(m_NumCells + 1, 0)] = 0.5f * (x[IX_DIM(m_NumCells, 0)] + x[IX_DIM(m_NumCells + 1, 1)]);
 	x[IX_DIM(m_NumCells + 1, m_NumCells + 1)] = 0.5f * (x[IX_DIM(m_NumCells, m_NumCells + 1)] + x[IX_DIM(m_NumCells + 1, m_NumCells)]);
-}
-
-void Solver::Switch(float a1[], float a2[])
-{
-	float *temp;
-	temp = a2;
-	a2 = a1;
-	a1 = temp;
 }
 
 void Solver::AddField(float z[], float s[] )

@@ -12,13 +12,12 @@ public:
 	void Diffuse(int b, float x[], float x0[]);
 	void lin_solve(int b, float x[], float x0[], float a, float c);
 	void set_bnd(int b, float x[]);
+	void advect(int b, float d[], float d0[], float u[], float v[]);
+	void project(float u[], float v[], float p[], float div[]);
 
 	int m_NumCells;
 	Vec2f *m_Field;
 	float m_Viscosity;
 	float m_Dt;
-
-private:
-	void Switch(float a1[], float a2[]);
 
 };
