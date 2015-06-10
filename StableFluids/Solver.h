@@ -9,6 +9,9 @@ public:
 	void velStep(float u[], float v[], float u0[], float v0[] );
 	void densStep(float x[], float x0[], float u[], float v[]);
 	void AddField(float y[], float s[] );
+	void Diffuse(int b, float x[], float x0[]);
+	void lin_solve(int b, float x[], float x0[], float a, float c);
+	void set_bnd(int b, float x[]);
 
 	int m_NumCells;
 	Vec2f *m_Field;

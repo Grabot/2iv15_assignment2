@@ -273,8 +273,6 @@ static void idle_func ( void )
 	get_from_UI( dens_prev, u_prev, v_prev );
 	solver->velStep(u, v, u_prev, v_prev);
 	solver->densStep(dens, dens_prev, u, v);
-	//VelocityField->TimeStep( PrevVelocityField, VelocityField );
-	//DensityField->TimeStep( PrevDensityField, VelocityField );
 	
 	glutSetWindow ( win_id );
 	glutPostRedisplay ();
