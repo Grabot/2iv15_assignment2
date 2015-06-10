@@ -2,8 +2,6 @@
 //
 #include <iostream>
 using namespace std;
-#include "ScalarField.h"
-#include "VectorField.h"
 #include "Solver.h"
 #include "FieldToolbox.h"
 #include "imageio.h"
@@ -35,8 +33,6 @@ static int frame_number;
 long long level_elapsed_time = 0;
 long long level_start_time = 0;
 
-static VectorField *VelocityField, *PrevVelocityField;
-static ScalarField *DensityField, *PrevDensityField;
 Solver *solver;
 
 static int win_id;
@@ -54,11 +50,6 @@ free/clear/allocate simulation data
 
 static void free_data ( void )
 {
-
-	if( VelocityField ) delete ( VelocityField );
-	if( PrevVelocityField ) delete ( PrevVelocityField );
-	if( DensityField ) delete ( DensityField );
-	if( PrevDensityField ) delete ( PrevDensityField );
 }
 
 static void clear_data ( void )
@@ -68,14 +59,7 @@ static void clear_data ( void )
 
 	for (int i = 0; i < size; i++)
 	{
-		u[i] = v[i] = u_prev[i] = v_prev[i] = 0.0f;
-	}
-
-	for ( i=0 ; i<size ; i++ ) {
-		(*VelocityField)[i][0] = (*VelocityField)[i][1] = 0.0f;
-		(*PrevVelocityField)[i][0] = (*PrevVelocityField)[i][1] = 0.0f;
-		(*DensityField)[i] = 0.0f;
-		(*PrevDensityField)[i] = 0.0f;
+		u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = 0.0f;
 	}
 }
 
@@ -92,16 +76,6 @@ static int allocate_data ( void )
 	dens_prev = new float[size];
 
 	FieldToolbox::Create();
-	VelocityField	  = new VectorField(N, visc, dt);
-	PrevVelocityField = new VectorField(N, visc, dt);
-	DensityField	  = new ScalarField(N, diff, dt);
-	PrevDensityField  = new ScalarField(N, diff, dt);
-
-	if ( !VelocityField || !PrevVelocityField || !DensityField || !PrevDensityField ) {
-		fprintf ( stderr, "cannot allocate data\n" );
-		return ( 0 );
-	}
-
 	return ( 1 );
 }
 
@@ -160,7 +134,6 @@ static void draw_velocity ( void )
 
 			glVertex2f ( x, y );
 			glVertex2f(x + u[IX(i, j)], y + v[IX(i, j)]);
-			//glVertex2f ( x+(*VelocityField)[IX(i,j)][0], y+(*VelocityField)[IX(i,j)][1] );
 		}
 	}
 
@@ -208,7 +181,6 @@ static void get_from_UI( float d[], float u[], float v[] )
 
 	for ( i=0 ; i<size ; i++ ) {
 		u[i] = v[i] = d[i] = 0.0f;
-		//(*u_v)[i][0] = (*u_v)[i][1] = (*d)[i] = 0.0f;
 	}
 
 	if ( !mouse_down[0] && !mouse_down[2] ) return;
@@ -226,8 +198,8 @@ static void get_from_UI( float d[], float u[], float v[] )
 	}
 
 	if ( mouse_down[2] ) {
-		d[IX(i, j)] = source;
-		//(*d)[IX(i,j)] = source;
+		int index = IX(i, j);
+		d[index] = source;
 	}
 
 	omx = mx;
@@ -300,6 +272,7 @@ static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
 	solver->velStep(u, v, u_prev, v_prev);
+	solver->densStep(dens, dens_prev, u, v);
 	//VelocityField->TimeStep( PrevVelocityField, VelocityField );
 	//DensityField->TimeStep( PrevDensityField, VelocityField );
 	

@@ -17,4 +17,5 @@ public:
 	float	*m_Field;
 	float	m_Viscosity;
 	float	m_Dt;
+
 };
