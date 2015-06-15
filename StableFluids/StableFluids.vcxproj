@@ -90,12 +90,14 @@
   <ItemGroup>
     <ClCompile Include="FieldToolbox.cpp" />
     <ClCompile Include="imageio.cpp" />
+    <ClCompile Include="MovingObject.cpp" />
     <ClCompile Include="Solver.cpp" />
     <ClCompile Include="StableFluids.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FieldToolbox.h" />
     <ClInclude Include="imageio.h" />
+    <ClInclude Include="MovingObject.h" />
     <ClInclude Include="Solver.h" />
   </ItemGroup>
   <ItemGroup>

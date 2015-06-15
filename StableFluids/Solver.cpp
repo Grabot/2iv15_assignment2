@@ -1,5 +1,6 @@
 #include <iostream>
 using namespace std;
+#include "MovingObject.h"
 #include "Solver.h"
 
 #define CREATE_DIM1 (new Vec2f[(a_NumCells+2)*(a_NumCells+2)])
@@ -14,7 +15,7 @@ Solver::Solver(int a_NumCells, float a_Viscosity, float a_Dt)
 	}
 }
 
-void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[])
+void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[], MovingObject *movingObject)
 {
 	AddField(u, u0);
 	AddField(v, v0);
@@ -24,15 +25,15 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 	u0 = u;
 	u = temp;
 
-	Diffuse(1, u, u0, object);
+	Diffuse(1, u, u0, object, movingObject);
 
 	temp = v0;
 	v0 = v;
 	v = temp;
 
-	Diffuse(2, v, v0, object);
+	Diffuse(2, v, v0, object, movingObject);
 
-	project(u, v, u0, v0, object);
+	project(u, v, u0, v0, object, movingObject);
 
 	temp = u0;
 	u0 = u;
@@ -42,27 +43,27 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 	v0 = v;
 	v = temp;
 
-	advect(1, u, u0, u0, v0, object);
-	advect(2, v, v0, u0, v0, object);
-	project(u, v, u0, v0, object);
+	advect(1, u, u0, u0, v0, object, movingObject);
+	advect(2, v, v0, u0, v0, object, movingObject);
+	project(u, v, u0, v0, object, movingObject);
 
 }
 
-void Solver::densStep(float x[], float x0[], float u[], float v[], float object[])
+void Solver::densStep(float x[], float x0[], float u[], float v[], float object[], MovingObject *movingObject)
 {
 	AddField(x, x0);
 	float *temp;
 	temp = x0;
 	x0 = x;
 	x = temp;
-	Diffuse(0, x, x0, object);
+	Diffuse(0, x, x0, object, movingObject);
 	temp = x0;
 	x0 = x;
 	x = temp;
-	advect(0, x, x0, u, v, object);
+	advect(0, x, x0, u, v, object, movingObject);
 }
 
-void Solver::project(float u[], float v[], float p[], float div[], float object[])
+void Solver::project(float u[], float v[], float p[], float div[], float object[], MovingObject *movingObject)
 {
 
 	for (int i = 1; i <= m_NumCells; i++)
@@ -73,10 +74,10 @@ void Solver::project(float u[], float v[], float p[], float div[], float object[
 			p[IX_DIM(i, j)] = 0;
 		}
 	}
-	set_bnd(0, div, object); 
-	set_bnd(0, p, object);
+	set_bnd(0, div, object, movingObject);
+	set_bnd(0, p, object, movingObject);
 
-	lin_solve(0, p, div, object, 1, 4);
+	lin_solve(0, p, div, object, movingObject, 1, 4);
 
 	for (int i = 1; i <= m_NumCells; i++)
 	{
@@ -86,11 +87,11 @@ void Solver::project(float u[], float v[], float p[], float div[], float object[
 			v[IX_DIM(i, j)] -= 0.5f * m_NumCells * (p[IX_DIM(i, j + 1)] - p[IX_DIM(i, j - 1)]);
 		}
 	}
-	set_bnd(1, u, object); 
-	set_bnd(2, v, object);
+	set_bnd(1, u, object, movingObject);
+	set_bnd(2, v, object, movingObject);
 }
 
-void Solver::advect(int b, float d[], float d0[], float u[], float v[], float object[])
+void Solver::advect(int b, float d[], float d0[], float u[], float v[], float object[], MovingObject *movingObject)
 {
 	int i0, j0, i1, j1;
 	float x, y, s0, t0, s1, t1, dt0;
@@ -118,16 +119,16 @@ void Solver::advect(int b, float d[], float d0[], float u[], float v[], float ob
 				s1 * (t0 * d0[IX_DIM(i1, j0)] + t1 * d0[IX_DIM(i1, j1)]);
 		}
 	}
-	set_bnd(b, d, object);
+	set_bnd(b, d, object, movingObject);
 }
 
-void Solver::Diffuse(int b, float x[], float x0[], float object[])
+void Solver::Diffuse(int b, float x[], float x0[], float object[], MovingObject *movingObject)
 {
 	float a = m_Dt * m_Viscosity * m_NumCells * m_NumCells;
-	lin_solve(b, x, x0, object, a, 1 + 4 * a);
+	lin_solve(b, x, x0, object, movingObject, a, 1 + 4 * a);
 }
 
-void Solver::lin_solve(int b, float x[], float x0[], float object[], float a, float c)
+void Solver::lin_solve(int b, float x[], float x0[], float object[], MovingObject *movingObject, float a, float c)
 {
 	for (int k = 0; k < 20; k++)
 	{
@@ -145,11 +146,11 @@ void Solver::lin_solve(int b, float x[], float x0[], float object[], float a, fl
 			}
 		}
 
-		set_bnd(b, x, object);
+		set_bnd(b, x, object, movingObject);
 	}
 }
 
-void Solver::set_bnd(int b, float x[], float object[])
+void Solver::set_bnd(int b, float x[], float object[], MovingObject *movingObject)
 {
 	int i, j;
 

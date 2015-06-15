@@ -71,7 +71,7 @@ static void clear_data ( void )
 static int allocate_data ( void )
 {
 	solver = new Solver(N, visc, dt);
-	movingObject = new MovingObject(Vec2f(0.5, 0.5), 0.1);
+	movingObject = new MovingObject(Vec2f(0.5, 0.5), 0.1, 0.0015, 0.001);
 	int size = (N + 2) * (N + 2);
 
 	u = new float[size];
@@ -327,8 +327,9 @@ static void reshape_func ( int width, int height )
 static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
-	solver->velStep(u, v, u_prev, v_prev, object);
-	solver->densStep(dens, dens_prev, u, v, object);
+	movingObject->MoveStep();
+	solver->velStep(u, v, u_prev, v_prev, object, movingObject);
+	solver->densStep(dens, dens_prev, u, v, object, movingObject);
 	
 	glutSetWindow ( win_id );
 	glutPostRedisplay ();
