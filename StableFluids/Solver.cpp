@@ -51,7 +51,6 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 void Solver::densStep(float x[], float x0[], float u[], float v[], float object[])
 {
 	AddField(x, x0);
-	//Switch(x0, x);
 	float *temp;
 	temp = x0;
 	x0 = x;

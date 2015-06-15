@@ -3,6 +3,7 @@
 #include <iostream>
 using namespace std;
 #include "Solver.h"
+#include "MovingObject.h"
 #include "FieldToolbox.h"
 #include "imageio.h"
 
@@ -11,6 +12,7 @@ using namespace std;
 #include <Windows.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+
 
 /* macros */
 
@@ -36,6 +38,7 @@ long long level_elapsed_time = 0;
 long long level_start_time = 0;
 
 Solver *solver;
+MovingObject *movingObject;
 
 static int win_id;
 static int win_x, win_y;
@@ -68,6 +71,7 @@ static void clear_data ( void )
 static int allocate_data ( void )
 {
 	solver = new Solver(N, visc, dt);
+	movingObject = new MovingObject(Vec2f(0.5, 0.5), 0.1);
 	int size = (N + 2) * (N + 2);
 
 	u = new float[size];
@@ -151,6 +155,8 @@ static void draw_object(void)
 		}
 	}
 	glEnd();
+
+	movingObject->draw();
 }
 static void draw_velocity ( void )
 {
