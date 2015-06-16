@@ -182,6 +182,14 @@ void Solver::set_bnd(int b, float x[], float object[], MovingObject *movingObjec
 		}
 	}
 
+	//moving objects
+	for (i = 2; i <= m_NumCells - 1; i++)
+	{
+		for (j = 2; j <= m_NumCells - 1; j++)
+		{
+		}
+	}
+
 	x[IX_DIM(0, 0)] = 0.5f * (x[IX_DIM(1, 0)] + x[IX_DIM(0, 1)]);
 	x[IX_DIM(0, m_NumCells + 1)] = 0.5f * (x[IX_DIM(1, m_NumCells + 1)] + x[IX_DIM(0, m_NumCells)]);
 	x[IX_DIM(m_NumCells + 1, 0)] = 0.5f * (x[IX_DIM(m_NumCells, 0)] + x[IX_DIM(m_NumCells + 1, 1)]);

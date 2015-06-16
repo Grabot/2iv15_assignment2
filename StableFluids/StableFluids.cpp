@@ -234,6 +234,8 @@ static void get_from_UI( float d[], float u[], float v[] )
 	if ( i<1 || i>N || j<1 || j>N ) return;
 
 	if ( mouse_down[0] ) {
+		movingObject->collisionObject(i, j);
+
 		u[IX(i, j)] = force*(mx - omx);
 		v[IX(i, j)] = force*(omy - my);
 	}

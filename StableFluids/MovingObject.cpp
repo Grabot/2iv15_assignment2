@@ -2,6 +2,7 @@
 using namespace std;
 #include "MovingObject.h"
 #include <GL/glut.h>
+#include <math.h>       /* floor */
 
 MovingObject::MovingObject(Vec2f pos, float size, float xSpeed, float ySpeed) 
 	: m_Pos(pos), m_Size(size), m_xSpeed(xSpeed), m_ySpeed(ySpeed), 
@@ -44,4 +45,19 @@ void MovingObject::MoveStep()
 	m_y1 += m_ySpeed;
 	m_x2 += m_xSpeed;
 	m_y2 += m_ySpeed;
+}
+
+bool MovingObject::collisionObject(int x, int y)
+{
+	float objectX1 = m_x1 * 64;
+	float objectX2 = m_x2 * 64;
+	float objectY1 = m_y1 * 64;
+	float objectY2 = m_y2 * 64;
+
+	if ((objectX1 < x) && (objectX2 > x) && (objectY1 < y) && (objectY2 > y))
+	{
+		return true;
+	}
+
+	return false;
 }

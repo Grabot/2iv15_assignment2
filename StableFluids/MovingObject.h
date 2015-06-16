@@ -7,6 +7,7 @@ public:
 	MovingObject(Vec2f pos, float size, float xSpeed, float ySpeed);
 	void draw();
 	void MoveStep();
+	bool collisionObject(int x, int y);
 	
 	Vec2f m_Pos;
 	float m_Size;
