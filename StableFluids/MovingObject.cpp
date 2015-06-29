@@ -20,20 +20,16 @@ MovingObject::MovingObject(Vec2f pos, float size)
 
 void MovingObject::draw( bool show )
 {
-	glTranslatef(m_Pos[0], m_Pos[1], 0.0);
-	glRotatef(rotation, 0, 0, 1);
-	glTranslatef(-m_Pos[0], -m_Pos[1], 0.0);
-
+	glBegin(GL_POLYGON);
+	glColor3f(0.0, 0.0, 1.0);
 	if (show)
 	{
-		glBegin(GL_POLYGON);
-		glColor3f(0.0, 0.0, 1.0);
-		glVertex2f(m_x1, m_y1);
-		glVertex2f(m_x2, m_y2);
-		glVertex2f(m_x3, m_y3);
-		glVertex2f(m_x4, m_y4);
-		glEnd();
+		glVertex2f(objectX1, objectY1);
+		glVertex2f(objectX2, objectY2);
+		glVertex2f(objectX3, objectY3);
+		glVertex2f(objectX4, objectY4);
 	}
+	glEnd();
 
 }
 

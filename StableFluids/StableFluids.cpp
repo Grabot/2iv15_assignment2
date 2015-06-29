@@ -23,9 +23,9 @@ using namespace std;
 
 /* global variables */
 
-float xSpeed1 = 0.000;
-float ySpeed1 = 0.000;
-float rotation1 = 1;
+float *xSpeed;
+float *ySpeed;
+float *rotation;
 
 static int N;
 static float dt, diff, visc;
@@ -80,18 +80,20 @@ static void clear_data ( void )
 static int allocate_data ( void )
 {
 	solver = new Solver(N, visc, dt);
-	//first block showing
-	//movings.push_back(new MovingObject(Vec2f(0.5, 0.5), 0.3, 0.002, 0.003, 0));
-	//second smaller block showing moving around
-	//movings.push_back(new MovingObject(Vec2f(0.3, 0.2), 0.2, -0.002, 0.003, 1));
-	//third (three) even smaller blocks showing moving around!!!!
-	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.1, 0.001, -0.003, 0));
-	//movings.push_back(new MovingObject(Vec2f(0.6, 0.8), 0.1, -0.002, 0.002, 0));
-	//movings.push_back(new MovingObject(Vec2f(0.5, 0.4), 0.1, 0.004, 0.001, 0));
-	//fourth small blocks showing moving around and rotating!!!!!
+
 	movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2));
-	//movings.push_back(new MovingObject(Vec2f(0.2, 0.3), -0.01, 0.02, -0.003, 1));
-	//movings.push_back(new MovingObject(Vec2f(0.4, 0.1), 0.01, -0.01, -0.03, 1));
+	movings.push_back(new MovingObject(Vec2f(0.2, 0.3), 0.2));
+
+	xSpeed = new float[movings.size()];
+	ySpeed = new float[movings.size()];
+	rotation = new float[movings.size()];
+	xSpeed[0] = 0.009;
+	ySpeed[0] = 0.003;
+	rotation[0] = 2;
+	xSpeed[1] = 0.002;
+	ySpeed[1] = 0.003;
+	rotation[1] = 1;
+
 	int size = (N + 2) * (N + 2);
 
 	u = new float[size];
@@ -350,25 +352,25 @@ static void MoveObjects()
 	{
 		if ((movings[i]->returnXLeft()) <= 0)
 		{
-			xSpeed1 = (xSpeed1 * -1);
+			xSpeed[i] = (xSpeed[i] * -1);
 		}
 
 		if ((movings[i]->returnXRight()) >= 1)
 		{
-			xSpeed1 = (xSpeed1 * -1);
+			xSpeed[i] = (xSpeed[i] * -1);
 		}
 
 		if ((movings[i]->returnYTop()) >= 1)
 		{
-			ySpeed1 = (ySpeed1 * -1);
+			ySpeed[i] = (ySpeed[i] * -1);
 		}
 
 		if ((movings[i]->returnYBottom()) <= 0)
 		{
-			ySpeed1 = (ySpeed1 * -1);
+			ySpeed[i] = (ySpeed[i] * -1);
 		}
 
-		movings[i]->MoveStep(xSpeed1, ySpeed1, rotation1);
+		movings[i]->MoveStep(xSpeed[i], ySpeed[i], rotation[i]);
 	}
 
 }
