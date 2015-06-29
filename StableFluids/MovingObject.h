@@ -8,8 +8,12 @@ public:
 	void draw();
 	void MoveStep();
 	bool pnpoly(int nvert, float testx, float testy);
-	float GetVelocityX(int x, int y, float u[]);
+	float GetVelXRight(int x, int y, float u[]);
+	float GetVelXLeft(int x, int y, float u[]);
+	float GetVelocityX(int x, int y, float v[]);
 	float GetVelocityY(int x, int y, float v[]);
+	float GetVelocityDensityXRight(int x, int y, float d[]);
+	float GetVelocityDensityXLeft(int x, int y, float d[]);
 	float GetVelocityDensity(int x, int y, float d[]);
 
 	Vec2f m_Pos;

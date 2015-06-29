@@ -194,7 +194,27 @@ void Solver::set_bnd(int b, float x[], float object[], std::vector<MovingObject*
 			{
 				if (movings[z]->pnpoly(4, i, j))
 				{
-					x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelocityX(i, j, x) : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensity(i, j, x);
+					/*
+					we will look for the edge blocks of the 
+					*/
+					//edge block on the right side
+					if (!movings[z]->pnpoly(4, i + 1, j))
+					{
+						x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelXRight(i, j, x) : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensityXRight(i, j, x);
+					}
+					
+					//edge block on the left side
+					if (!movings[z]->pnpoly(4, i - 1, j))
+					{
+						x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelXLeft(i, j, x) : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensityXLeft(i, j, x);
+					}
+
+					//block is completely inside the block
+					if (movings[z]->pnpoly(4, i - 1, j) && movings[z]->pnpoly(4, i+1, j))
+					{
+						x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensity(i, j, x);
+					}
+					//x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelocityX(i, j, x) : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensity(i, j, x);
 				}
 			}
 		}

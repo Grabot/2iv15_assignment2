@@ -102,6 +102,16 @@ bool MovingObject::pnpoly(int nvert, float testx, float testy)
 	return c;
 }
 
+float MovingObject::GetVelXRight(int x, int y, float u[])
+{
+	return -u[IX_DIM(x + 1, y)] + ((m_xSpeed * 64) > 0 ? (m_xSpeed * 64) : 0);
+}
+
+float MovingObject::GetVelXLeft(int x, int y, float u[])
+{
+	return -u[IX_DIM(x - 1, y)] + ((m_xSpeed * 64) > 0 ? 0 : (m_xSpeed * 64));
+}
+
 float MovingObject::GetVelocityX(int x, int y, float u[])
 {
 	float realObjectX1 = m_x1 * 64;
@@ -138,6 +148,16 @@ float MovingObject::GetVelocityY(int x, int y, float v[])
 	return 0;
 }
 
+float MovingObject::GetVelocityDensityXRight(int x, int y, float d[])
+{
+	return d[IX_DIM(x + 1, y)];
+}
+
+float MovingObject::GetVelocityDensityXLeft(int x, int y, float d[])
+{
+	return d[IX_DIM(x - 1, y)];
+}
+
 float MovingObject::GetVelocityDensity(int x, int y, float d[])
 {
 	float realObjectX1 = m_x1 * 64;
@@ -145,7 +165,7 @@ float MovingObject::GetVelocityDensity(int x, int y, float d[])
 	float realObjectY1 = m_y1 * 64;
 	float realObjectY2 = m_y2 * 64;
 
-	if (x == floor(realObjectX2))
+	if (x == floor(objectX3))
 	{
 		return d[IX_DIM(x + 1, y)];
 	}
