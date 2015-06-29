@@ -23,8 +23,9 @@ using namespace std;
 
 /* global variables */
 
-float xSpeed1 = 0.009;
-float ySpeed1 = 0.008;
+float xSpeed1 = 0.000;
+float ySpeed1 = 0.000;
+float rotation1 = 1;
 
 static int N;
 static float dt, diff, visc;
@@ -88,7 +89,7 @@ static int allocate_data ( void )
 	//movings.push_back(new MovingObject(Vec2f(0.6, 0.8), 0.1, -0.002, 0.002, 0));
 	//movings.push_back(new MovingObject(Vec2f(0.5, 0.4), 0.1, 0.004, 0.001, 0));
 	//fourth small blocks showing moving around and rotating!!!!!
-	movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2, 4));
+	movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2));
 	//movings.push_back(new MovingObject(Vec2f(0.2, 0.3), -0.01, 0.02, -0.003, 1));
 	//movings.push_back(new MovingObject(Vec2f(0.4, 0.1), 0.01, -0.01, -0.03, 1));
 	int size = (N + 2) * (N + 2);
@@ -341,9 +342,8 @@ static void reshape_func ( int width, int height )
 	win_y = height;
 }
 
-static void idle_func ( void )
+static void MoveObjects()
 {
-	get_from_UI( dens_prev, u_prev, v_prev );
 	int size = movings.size();
 
 	for (int i = 0; i < size; i++)
@@ -367,10 +367,16 @@ static void idle_func ( void )
 		{
 			ySpeed1 = (ySpeed1 * -1);
 		}
-		movings[i]->MoveStep( xSpeed1, ySpeed1 );
+
+		movings[i]->MoveStep(xSpeed1, ySpeed1, rotation1);
 	}
 
-	//movingObject->MoveStep();
+}
+
+static void idle_func ( void )
+{
+	get_from_UI( dens_prev, u_prev, v_prev );
+	MoveObjects();
 	solver->velStep(u, v, u_prev, v_prev, object, movings);
 	solver->densStep(dens, dens_prev, u, v, object, movings);
 	

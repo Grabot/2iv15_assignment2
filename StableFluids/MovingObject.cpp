@@ -9,8 +9,8 @@ using namespace std;
 std::vector<float> vertx;
 std::vector<float> verty;
 
-MovingObject::MovingObject(Vec2f pos, float size, float rotate)
-	: m_Pos(pos), objectPos(pos), m_Size(size), m_xSpeed(0), m_ySpeed(0), m_rotate(rotate), rotation(0),
+MovingObject::MovingObject(Vec2f pos, float size)
+	: m_Pos(pos), objectPos(pos), m_Size(size), m_xSpeed(0), m_ySpeed(0), m_rotate(0), rotation(0),
 	m_x1(pos[0] - (size / 2)), m_x2(pos[0] - (size / 2)), m_x3(pos[0] + (size / 2)), m_x4(pos[0] + (size / 2)),
 	m_y1(pos[1] - (size / 2)), m_y2(pos[1] + (size / 2)), m_y3(pos[1] + (size / 2)), m_y4(pos[1] - (size / 2)),
 	objectX1(pos[0] - (size / 2)), objectX2(pos[0] - (size / 2)), objectX3(pos[0] + (size / 2)), objectX4(pos[0] + (size / 2)),
@@ -137,7 +137,7 @@ float MovingObject::returnYBottom()
 	return 0.5f;
 }
 
-void MovingObject::MoveStep( float xSpeed, float ySpeed )
+void MovingObject::MoveStep( float xSpeed, float ySpeed, float rotate )
 {
 	m_xSpeed = xSpeed;
 	m_ySpeed = ySpeed;
@@ -155,7 +155,7 @@ void MovingObject::MoveStep( float xSpeed, float ySpeed )
 	m_y3 += m_ySpeed;
 	m_y4 += m_ySpeed;
 
-	rotation += m_rotate;
+	rotation += rotate;
 
 	objectX1 = ((m_x1 - m_Pos[0])*cos(rotation*PI / 180) - (m_y1 - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
 	objectY1 = ((m_x1 - m_Pos[0])*sin(rotation*PI / 180) + (m_y1 - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);

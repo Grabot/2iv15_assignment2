@@ -4,9 +4,9 @@
 class MovingObject
 {
 public:
-	MovingObject(Vec2f pos, float size, float rotate);
+	MovingObject(Vec2f pos, float size);
 	void draw( bool show );
-	void MoveStep( float xSpeed, float ySpeed );
+	void MoveStep( float xSpeed, float ySpeed, float rotate );
 	bool pnpoly(int nvert, float testx, float testy);
 	float GetVelXRight(int x, int y, float u[]);
 	float GetVelXLeft(int x, int y, float u[]);
