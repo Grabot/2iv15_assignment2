@@ -92,7 +92,7 @@ static int allocate_data ( void )
 	rotation[0] = 2;
 	xSpeed[1] = 0.002;
 	ySpeed[1] = 0.003;
-	rotation[1] = 1;
+	rotation[1] = -1;
 
 	int size = (N + 2) * (N + 2);
 
@@ -223,10 +223,10 @@ static void draw_density ( void )
 			d10 = dens[IX(i + 1, j)];
 			d11 = dens[IX(i + 1, j + 1)];
 
-			glColor3f(d00, d00, d00); glVertex2f(x, y);
-			glColor3f(d10, d10, d10); glVertex2f(x + h, y);
-			glColor3f(d11, d11, d11); glVertex2f(x + h, y + h);
-			glColor3f(d01, d01, d01); glVertex2f(x, y + h);
+			glColor3f(d00*0.3, d00*0.8, d00); glVertex2f(x, y);
+			glColor3f(d10*0.3, d10*0.8, d10); glVertex2f(x + h, y);
+			glColor3f(d11*0.3, d11*0.8, d11); glVertex2f(x + h, y + h);
+			glColor3f(d01*0.3, d01*0.8, d01); glVertex2f(x, y + h);
 		}
 	}
 
@@ -369,6 +369,9 @@ static void MoveObjects()
 		{
 			ySpeed[i] = (ySpeed[i] * -1);
 		}
+
+		xSpeed[i] = xSpeed[i] * 0.99;
+		ySpeed[i] = ySpeed[i] * 0.99;
 
 		movings[i]->MoveStep(xSpeed[i], ySpeed[i], rotation[i]);
 	}
