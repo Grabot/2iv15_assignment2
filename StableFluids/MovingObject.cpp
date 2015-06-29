@@ -164,6 +164,7 @@ void MovingObject::MoveStep( float xSpeed, float ySpeed, float rotate )
 
 }
 
+//ref: http ://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html 
 bool MovingObject::pnpoly(int nvert, float testx, float testy)
 {
 	vertx.clear();

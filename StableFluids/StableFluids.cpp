@@ -87,11 +87,11 @@ static int allocate_data ( void )
 	xSpeed = new float[movings.size()];
 	ySpeed = new float[movings.size()];
 	rotation = new float[movings.size()];
-	xSpeed[0] = 0.009;
-	ySpeed[0] = 0.003;
+	xSpeed[0] = 0.00;
+	ySpeed[0] = 0.00;
 	rotation[0] = 2;
-	xSpeed[1] = 0.002;
-	ySpeed[1] = 0.003;
+	xSpeed[1] = 0.00;
+	ySpeed[1] = 0.00;
 	rotation[1] = -1;
 
 	int size = (N + 2) * (N + 2);
@@ -344,7 +344,7 @@ static void reshape_func ( int width, int height )
 	win_y = height;
 }
 
-static void MoveObjects()
+void MoveObjects()
 {
 	int size = movings.size();
 
@@ -378,10 +378,44 @@ static void MoveObjects()
 
 }
 
+void twoWayCoupling()
+{
+	int i, j;
+
+	for (i = 1; i <= N; i++) {
+		for (j = 1; j <= N; j++) {
+			for (int k = 0; k < movings.size(); k++)
+			{
+				if (movings[k]->pnpoly(4, i, j))
+				{
+					if ((u[IX(i, j)]) > 0.8)
+					{
+						xSpeed[k] = -0.01;
+					}
+					else if ((u[IX(i, j)]) < -0.8)
+					{
+						xSpeed[k] = 0.01;
+					}
+
+					if ((v[IX(i, j)]) > 0.8)
+					{
+						ySpeed[k] = -0.01;
+					}
+					else if ((v[IX(i, j)]) < -0.8)
+					{
+						ySpeed[k] = 0.01;
+					}
+				}
+			}
+		}
+	}
+}
+
 static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
 	MoveObjects();
+	twoWayCoupling();
 	solver->velStep(u, v, u_prev, v_prev, object, movings);
 	solver->densStep(dens, dens_prev, u, v, object, movings);
 	
