@@ -77,7 +77,7 @@ static int allocate_data ( void )
 {
 	solver = new Solver(N, visc, dt);
 	//first block showing
-	movings.push_back(new MovingObject(Vec2f(0.5, 0.5), 0.3, 0.006, 0.0, 0));
+	movings.push_back(new MovingObject(Vec2f(0.5, 0.5), 0.3, 0.00, 0.005, 0));
 	//second smaller block showing moving around
 	//movings.push_back(new MovingObject(Vec2f(0.3, 0.2), 0.2, -0.002, 0.003, 0));
 	//third (three) even smaller blocks showing moving around!!!!

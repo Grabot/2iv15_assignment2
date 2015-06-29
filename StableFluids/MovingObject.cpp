@@ -112,6 +112,16 @@ float MovingObject::GetVelXLeft(int x, int y, float u[])
 	return -u[IX_DIM(x - 1, y)] + ((m_xSpeed * 64) > 0 ? 0 : (m_xSpeed * 64));
 }
 
+float MovingObject::GetVelYUp(int x, int y, float v[])
+{
+	return -v[IX_DIM(x, y - 1)] + ((m_ySpeed * 64) > 0 ? 0 : (m_ySpeed * 64));
+}
+
+float MovingObject::GetVelYDown(int x, int y, float v[])
+{
+	return -v[IX_DIM(x, y + 1)] + ((m_ySpeed * 64) > 0 ? (m_ySpeed * 64) : 0);
+}
+
 float MovingObject::GetVelocityX(int x, int y, float u[])
 {
 	float realObjectX1 = m_x1 * 64;
@@ -158,6 +168,15 @@ float MovingObject::GetVelocityDensityXLeft(int x, int y, float d[])
 	return d[IX_DIM(x - 1, y)];
 }
 
+float MovingObject::GetVelocityDensityYUp(int x, int y, float d[])
+{
+	return d[IX_DIM(x, y - 1)];
+}
+
+float MovingObject::GetVelocityDensityYDown(int x, int y, float d[])
+{
+	return d[IX_DIM(x, y + 1)];
+}
 float MovingObject::GetVelocityDensity(int x, int y, float d[])
 {
 	float realObjectX1 = m_x1 * 64;
