@@ -9,8 +9,8 @@ using namespace std;
 std::vector<float> vertx;
 std::vector<float> verty;
 
-MovingObject::MovingObject(Vec2f pos, float size, float xSpeed, float ySpeed, float rotate)
-	: m_Pos(pos), objectPos(pos), m_Size(size), m_xSpeed(xSpeed), m_ySpeed(ySpeed), m_rotate(rotate), rotation(0),
+MovingObject::MovingObject(Vec2f pos, float size, float rotate)
+	: m_Pos(pos), objectPos(pos), m_Size(size), m_xSpeed(0), m_ySpeed(0), m_rotate(rotate), rotation(0),
 	m_x1(pos[0] - (size / 2)), m_x2(pos[0] - (size / 2)), m_x3(pos[0] + (size / 2)), m_x4(pos[0] + (size / 2)),
 	m_y1(pos[1] - (size / 2)), m_y2(pos[1] + (size / 2)), m_y3(pos[1] + (size / 2)), m_y4(pos[1] - (size / 2)),
 	objectX1(pos[0] - (size / 2)), objectX2(pos[0] - (size / 2)), objectX3(pos[0] + (size / 2)), objectX4(pos[0] + (size / 2)),
@@ -35,27 +35,112 @@ void MovingObject::draw( bool show )
 		glEnd();
 	}
 
-	rotation += m_rotate;
 }
 
-void MovingObject::MoveStep()
+float MovingObject::returnXLeft()
 {
-	if (m_x1 < 0)
+	if (m_x1 <= m_x2 && m_x1 <= m_x3 && m_x1 <= m_x4)
 	{
-		m_xSpeed = m_xSpeed*-1;
+		return m_x1;
 	}
-	if (m_x3 > 1)
+
+	if (m_x2 <= m_x1 && m_x2 <= m_x3 && m_x2 <= m_x4)
 	{
-		m_xSpeed = m_xSpeed*-1;
+		return m_x2;
 	}
-	if (m_y3 > 1)
+
+	if (m_x3 <= m_x2 && m_x3 <= m_x1 && m_x3 <= m_x4)
 	{
-		m_ySpeed = m_ySpeed*-1;
+		return m_x3;
 	}
-	if (m_y1 < 0)
+
+	if (m_x4 <= m_x2 && m_x4 <= m_x3 && m_x4 <= m_x1)
 	{
-		m_ySpeed = m_ySpeed*-1;
+		return m_x4;
 	}
+
+	return 0.5f;
+}
+
+float MovingObject::returnXRight()
+{
+	if (m_x1 >= m_x2 && m_x1 >= m_x3 && m_x1 >= m_x4)
+	{
+		return m_x1;
+	}
+
+	if (m_x2 >= m_x1 && m_x2 >= m_x3 && m_x2 >= m_x4)
+	{
+		return m_x2;
+	}
+
+	if (m_x3 >= m_x2 && m_x3 >= m_x1 && m_x3 >= m_x4)
+	{
+		return m_x3;
+	}
+
+	if (m_x4 >= m_x2 && m_x4 >= m_x3 && m_x4 >= m_x1)
+	{
+		return m_x4;
+	}
+
+	return 0.5f;
+}
+
+float MovingObject::returnYTop()
+{
+	if (m_y1 >= m_y2 && m_y1 >= m_y3 && m_y1 >= m_y4)
+	{
+		return m_y1;
+	}
+
+	if (m_y2 >= m_y1 && m_y2 >= m_y3 && m_y2 >= m_y4)
+	{
+		return m_y2;
+	}
+
+	if (m_y3 >= m_y2 && m_y3 >= m_y1 && m_y3 >= m_y4)
+	{
+		return m_y3;
+	}
+
+	if (m_y4 >= m_y2 && m_y4 >= m_y3 && m_y4 >= m_y1)
+	{
+		return m_y4;
+	}
+
+	return 0.5f;
+}
+
+float MovingObject::returnYBottom()
+{
+	if (m_y1 <= m_y2 && m_y1 <= m_y3 && m_y1 <= m_y4)
+	{
+		return m_y1;
+	}
+
+	if (m_y2 <= m_y1 && m_y2 <= m_y3 && m_y2 <= m_y4)
+	{
+		return m_y2;
+	}
+
+	if (m_y3 <= m_y2 && m_y3 <= m_y1 && m_y3 <= m_y4)
+	{
+		return m_y3;
+	}
+
+	if (m_y4 <= m_y2 && m_y4 <= m_y3 && m_y4 <= m_y1)
+	{
+		return m_y4;
+	}
+
+	return 0.5f;
+}
+
+void MovingObject::MoveStep( float xSpeed, float ySpeed )
+{
+	m_xSpeed = xSpeed;
+	m_ySpeed = ySpeed;
 
 	m_Pos[0] = m_Pos[0] + m_xSpeed;
 	m_Pos[1] = m_Pos[1] + m_ySpeed;
@@ -69,6 +154,8 @@ void MovingObject::MoveStep()
 	m_y2 += m_ySpeed;
 	m_y3 += m_ySpeed;
 	m_y4 += m_ySpeed;
+
+	rotation += m_rotate;
 
 	objectX1 = ((m_x1 - m_Pos[0])*cos(rotation*PI / 180) - (m_y1 - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
 	objectY1 = ((m_x1 - m_Pos[0])*sin(rotation*PI / 180) + (m_y1 - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);

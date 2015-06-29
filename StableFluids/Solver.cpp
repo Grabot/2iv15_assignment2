@@ -22,7 +22,7 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 	AddField(u, u0);
 	AddField(v, v0);
 
-	vorticityConfinement( u, v, u0, v0);
+	//vorticityConfinement( u, v );
 
 	float *temp;
 	temp = u0;
@@ -259,7 +259,7 @@ void Solver::set_bnd(int b, float x[], float object[], std::vector<MovingObject*
 	x[IX_DIM(m_NumCells + 1, m_NumCells + 1)] = 0.5f * (x[IX_DIM(m_NumCells, m_NumCells + 1)] + x[IX_DIM(m_NumCells + 1, m_NumCells)]);
 }
 
-void Solver::vorticityConfinement(float u[], float v[], float u0[], float v0[]) {
+void Solver::vorticityConfinement(float p[], float k[]) {
 
 	int N = m_NumCells;
 	float *forces = new float[(N + 2) * (N + 2)]();
@@ -267,8 +267,8 @@ void Solver::vorticityConfinement(float u[], float v[], float u0[], float v0[]) 
 
 	for (int i = 1; i <= N; i++) {
 		for (int j = 1; j <= N; j++) {
-			float dudy = (u[IX_DIM(i, j + 1)] - u[IX_DIM(i, j - 1)]) / 2;
-			float dvdx = (v[IX_DIM(i + 1, j)] - v[IX_DIM(i - 1, j)]) / 2;
+			float dudy = (p[IX_DIM(i, j + 1)] - p[IX_DIM(i, j - 1)]) / 2;
+			float dvdx = (k[IX_DIM(i + 1, j)] - k[IX_DIM(i - 1, j)]) / 2;
 
 			float toStore = dvdx - dudy;
 			forces[IX_DIM(i, j)] = abs(toStore);
@@ -297,8 +297,8 @@ void Solver::vorticityConfinement(float u[], float v[], float u0[], float v0[]) 
 
 			float v2 = sign[IX_DIM(i, j)] * forces[IX_DIM(i, j)];
 
-			u[IX_DIM(i, j)] = dwdy * -v2;
-			v[IX_DIM(i, j)] = dwdx * v2;
+			p[IX_DIM(i, j)] = dwdy * -v2;
+			k[IX_DIM(i, j)] = dwdx * v2;
 			//            Fvc_x[IX(i, j)] = dwdy * -v;
 			//            Fvc_y[IX(i, j)] = dwdx *  v;
 		}

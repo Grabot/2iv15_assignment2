@@ -23,6 +23,9 @@ using namespace std;
 
 /* global variables */
 
+float xSpeed1 = 0.009;
+float ySpeed1 = 0.008;
+
 static int N;
 static float dt, diff, visc;
 static float force, source;
@@ -85,7 +88,7 @@ static int allocate_data ( void )
 	//movings.push_back(new MovingObject(Vec2f(0.6, 0.8), 0.1, -0.002, 0.002, 0));
 	//movings.push_back(new MovingObject(Vec2f(0.5, 0.4), 0.1, 0.004, 0.001, 0));
 	//fourth small blocks showing moving around and rotating!!!!!
-	movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2, 0.005, -0.003, 4));
+	movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2, 4));
 	//movings.push_back(new MovingObject(Vec2f(0.2, 0.3), -0.01, 0.02, -0.003, 1));
 	//movings.push_back(new MovingObject(Vec2f(0.4, 0.1), 0.01, -0.01, -0.03, 1));
 	int size = (N + 2) * (N + 2);
@@ -251,8 +254,6 @@ static void get_from_UI( float d[], float u[], float v[] )
 	if ( mouse_down[0] ) {
 		u[IX(i, j)] = force*(mx - omx);
 		v[IX(i, j)] = force*(omy - my);
-
-		cout << "mouse x: " << i << " mouse y: " << j << " collision?: " << movings[0] -> pnpoly(4, i, j ) << endl;
 	}
 
 	if (mouse_down[2] && buttonW == 1)
@@ -263,7 +264,6 @@ static void get_from_UI( float d[], float u[], float v[] )
 	if ( mouse_down[2] && buttonW == 0 ) {
 		d[IX(i, j)] = source;
 	}
-
 
 	omx = mx;
 	omy = my;
@@ -345,10 +345,31 @@ static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
 	int size = movings.size();
+
 	for (int i = 0; i < size; i++)
 	{
-		movings[i]->MoveStep();
+		if ((movings[i]->returnXLeft()) <= 0)
+		{
+			xSpeed1 = (xSpeed1 * -1);
+		}
+
+		if ((movings[i]->returnXRight()) >= 1)
+		{
+			xSpeed1 = (xSpeed1 * -1);
+		}
+
+		if ((movings[i]->returnYTop()) >= 1)
+		{
+			ySpeed1 = (ySpeed1 * -1);
+		}
+
+		if ((movings[i]->returnYBottom()) <= 0)
+		{
+			ySpeed1 = (ySpeed1 * -1);
+		}
+		movings[i]->MoveStep( xSpeed1, ySpeed1 );
 	}
+
 	//movingObject->MoveStep();
 	solver->velStep(u, v, u_prev, v_prev, object, movings);
 	solver->densStep(dens, dens_prev, u, v, object, movings);

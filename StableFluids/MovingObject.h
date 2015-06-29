@@ -4,9 +4,9 @@
 class MovingObject
 {
 public:
-	MovingObject(Vec2f pos, float size, float xSpeed, float ySpeed, float rotate);
+	MovingObject(Vec2f pos, float size, float rotate);
 	void draw( bool show );
-	void MoveStep();
+	void MoveStep( float xSpeed, float ySpeed );
 	bool pnpoly(int nvert, float testx, float testy);
 	float GetVelXRight(int x, int y, float u[]);
 	float GetVelXLeft(int x, int y, float u[]);
@@ -16,6 +16,10 @@ public:
 	float GetVelocityDensityXLeft(int x, int y, float d[]);
 	float GetVelocityDensityYUp(int x, int y, float d[]);
 	float GetVelocityDensityYDown(int x, int y, float d[]);
+	float returnXLeft();
+	float returnXRight();
+	float returnYTop();
+	float returnYBottom();
 
 	Vec2f m_Pos;
 	Vec2f objectPos;
