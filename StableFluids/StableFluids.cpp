@@ -77,15 +77,17 @@ static int allocate_data ( void )
 {
 	solver = new Solver(N, visc, dt);
 	//first block showing
-	movings.push_back(new MovingObject(Vec2f(0.5, 0.5), 0.3, 0.002, 0.003, 0));
+	//movings.push_back(new MovingObject(Vec2f(0.5, 0.5), 0.3, 0.002, 0.003, 0));
 	//second smaller block showing moving around
-	//movings.push_back(new MovingObject(Vec2f(0.3, 0.2), 0.2, -0.002, 0.003, 0));
+	//movings.push_back(new MovingObject(Vec2f(0.3, 0.2), 0.2, -0.002, 0.003, 1));
 	//third (three) even smaller blocks showing moving around!!!!
 	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.1, 0.001, -0.003, 0));
 	//movings.push_back(new MovingObject(Vec2f(0.6, 0.8), 0.1, -0.002, 0.002, 0));
 	//movings.push_back(new MovingObject(Vec2f(0.5, 0.4), 0.1, 0.004, 0.001, 0));
 	//fourth small blocks showing moving around and rotating!!!!!
-	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.1, 0.005, -0.003, 1));
+	movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2, 0.005, -0.003, 4));
+	//movings.push_back(new MovingObject(Vec2f(0.2, 0.3), -0.01, 0.02, -0.003, 1));
+	//movings.push_back(new MovingObject(Vec2f(0.4, 0.1), 0.01, -0.01, -0.03, 1));
 	int size = (N + 2) * (N + 2);
 
 	u = new float[size];
@@ -170,13 +172,6 @@ static void draw_object(void)
 	}
 	glEnd();
 
-	//movingObject->draw();
-
-	int size = movings.size();
-	for (int i = 0; i < size; i++)
-	{
-		movings[i]->draw();
-	}
 }
 static void draw_velocity ( void )
 {
@@ -369,11 +364,23 @@ static void display_func ( void )
 	if (dvel)
 	{
 		draw_velocity();
+
+		int size = movings.size();
+		for (int i = 0; i < size; i++)
+		{
+			movings[i]->draw( false );
+		}
 	}
 	else
 	{
 		draw_density(); 
 		draw_object();
+
+		int size = movings.size();
+		for (int i = 0; i < size; i++)
+		{
+			movings[i]->draw( true );
+		}
 	}
 	
 

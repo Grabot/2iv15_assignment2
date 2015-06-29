@@ -22,6 +22,8 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 	AddField(u, u0);
 	AddField(v, v0);
 
+	vorticityConfinement( u, v, u0, v0);
+
 	float *temp;
 	temp = u0;
 	u0 = u;
@@ -231,19 +233,19 @@ void Solver::set_bnd(int b, float x[], float object[], std::vector<MovingObject*
 					}
 					else if (!movings[z]->pnpoly(4, i, j - 1))
 					{
-						//edge block on the top side
-						x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelocityX(i, j, x) : (b == 2) ? movings[z]->GetVelYUp(i, j, x) : movings[z]->GetVelocityDensityYUp(i, j, x);
+						//edge block on the top side, we assume we have all possibilities
+						x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? movings[z]->GetVelYUp(i, j, x) : movings[z]->GetVelocityDensityYUp(i, j, x);
 					}
 					else if (!movings[z]->pnpoly(4, i, j + 1))
 					{
-						//edge block on the bottom side
-						x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelocityX(i, j, x) : (b == 2) ? movings[z]->GetVelYDown(i, j, x) : movings[z]->GetVelocityDensityYDown(i, j, x);
+						//edge block on the bottom side, we assume we have all possibilities
+						x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? movings[z]->GetVelYDown(i, j, x) : movings[z]->GetVelocityDensityYDown(i, j, x);
 					}
 
 					//block is completely inside the block
 					if (movings[z]->pnpoly(4, i - 1, j) && movings[z]->pnpoly(4, i+1, j) && movings[z]->pnpoly(4, i, j+1 ) && movings[z] -> pnpoly(4, i, j-1 ))
 					{
-						x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? 0 : movings[z]->GetVelocityDensity(i, j, x);
+						x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? 0 : 0;
 					}
 					//x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelocityX(i, j, x) : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensity(i, j, x);
 				}
@@ -256,6 +258,55 @@ void Solver::set_bnd(int b, float x[], float object[], std::vector<MovingObject*
 	x[IX_DIM(m_NumCells + 1, 0)] = 0.5f * (x[IX_DIM(m_NumCells, 0)] + x[IX_DIM(m_NumCells + 1, 1)]);
 	x[IX_DIM(m_NumCells + 1, m_NumCells + 1)] = 0.5f * (x[IX_DIM(m_NumCells, m_NumCells + 1)] + x[IX_DIM(m_NumCells + 1, m_NumCells)]);
 }
+
+void Solver::vorticityConfinement(float u[], float v[], float u0[], float v0[]) {
+
+	int N = m_NumCells;
+	float *forces = new float[(N + 2) * (N + 2)]();
+	int *sign = new int[(N + 2) * (N + 2)]();
+
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= N; j++) {
+			float dudy = (u[IX_DIM(i, j + 1)] - u[IX_DIM(i, j - 1)]) / 2;
+			float dvdx = (v[IX_DIM(i + 1, j)] - v[IX_DIM(i - 1, j)]) / 2;
+
+			float toStore = dvdx - dudy;
+			forces[IX_DIM(i, j)] = abs(toStore);
+
+			sign[IX_DIM(i, j)] = toStore < 0 ? -1 : 1;
+			//            std::cout << "Sign " << sign[IX(i,j)] << " toStore" << toStore << std::endl;
+
+		}
+	}
+
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= N; j++) {
+
+			float dwdx = (forces[IX_DIM(i + 1, j)] - forces[IX_DIM(i - 1, j)]) * 0.5f;
+			float dwdy = (forces[IX_DIM(i, j + 1)] - forces[IX_DIM(i, j - 1)]) * 0.5f;
+
+			float length = sqrt(dwdx * dwdx + dwdy * dwdy);
+
+			if (length != 0){
+				dwdx /= length;
+				dwdy /= length;
+			}
+			//                dwdx /= 0.0000001f;
+			//                dwdy /= 0.0000001f;
+			//            }
+
+			float v2 = sign[IX_DIM(i, j)] * forces[IX_DIM(i, j)];
+
+			u[IX_DIM(i, j)] = dwdy * -v2;
+			v[IX_DIM(i, j)] = dwdx * v2;
+			//            Fvc_x[IX(i, j)] = dwdy * -v;
+			//            Fvc_y[IX(i, j)] = dwdx *  v;
+		}
+	}
+
+	free(forces);
+}
+
 
 void Solver::AddField(float z[], float s[] )
 {
