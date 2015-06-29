@@ -2,9 +2,11 @@
 using namespace std;
 #include "MovingObject.h"
 #include "Solver.h"
+#include <algorithm>
+#include <list>
+#include <vector>
 
 #define CREATE_DIM1 (new Vec2f[(a_NumCells+2)*(a_NumCells+2)])
-#define IX_DIM(i,j) ((i)+(m_NumCells+2)*(j))
 
 Solver::Solver(int a_NumCells, float a_Viscosity, float a_Dt) 
 	: m_NumCells(a_NumCells), m_Field(CREATE_DIM1), m_Viscosity(a_Viscosity), m_Dt(a_Dt)
@@ -15,7 +17,7 @@ Solver::Solver(int a_NumCells, float a_Viscosity, float a_Dt)
 	}
 }
 
-void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[], MovingObject *movingObject)
+void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[], std::vector<MovingObject*> movings )
 {
 	AddField(u, u0);
 	AddField(v, v0);
@@ -25,15 +27,15 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 	u0 = u;
 	u = temp;
 
-	Diffuse(1, u, u0, object, movingObject);
+	Diffuse(1, u, u0, object, movings);
 
 	temp = v0;
 	v0 = v;
 	v = temp;
 
-	Diffuse(2, v, v0, object, movingObject);
+	Diffuse(2, v, v0, object, movings);
 
-	project(u, v, u0, v0, object, movingObject);
+	project(u, v, u0, v0, object, movings);
 
 	temp = u0;
 	u0 = u;
@@ -43,27 +45,27 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 	v0 = v;
 	v = temp;
 
-	advect(1, u, u0, u0, v0, object, movingObject);
-	advect(2, v, v0, u0, v0, object, movingObject);
-	project(u, v, u0, v0, object, movingObject);
+	advect(1, u, u0, u0, v0, object, movings);
+	advect(2, v, v0, u0, v0, object, movings);
+	project(u, v, u0, v0, object, movings);
 
 }
 
-void Solver::densStep(float x[], float x0[], float u[], float v[], float object[], MovingObject *movingObject)
+void Solver::densStep(float x[], float x0[], float u[], float v[], float object[], std::vector<MovingObject*> movings )
 {
 	AddField(x, x0);
 	float *temp;
 	temp = x0;
 	x0 = x;
 	x = temp;
-	Diffuse(0, x, x0, object, movingObject);
+	Diffuse(0, x, x0, object, movings);
 	temp = x0;
 	x0 = x;
 	x = temp;
-	advect(0, x, x0, u, v, object, movingObject);
+	advect(0, x, x0, u, v, object, movings);
 }
 
-void Solver::project(float u[], float v[], float p[], float div[], float object[], MovingObject *movingObject)
+void Solver::project(float u[], float v[], float p[], float div[], float object[], std::vector<MovingObject*> movings )
 {
 
 	for (int i = 1; i <= m_NumCells; i++)
@@ -74,10 +76,10 @@ void Solver::project(float u[], float v[], float p[], float div[], float object[
 			p[IX_DIM(i, j)] = 0;
 		}
 	}
-	set_bnd(0, div, object, movingObject);
-	set_bnd(0, p, object, movingObject);
+	set_bnd(0, div, object, movings);
+	set_bnd(0, p, object, movings);
 
-	lin_solve(0, p, div, object, movingObject, 1, 4);
+	lin_solve(0, p, div, object, movings, 1, 4);
 
 	for (int i = 1; i <= m_NumCells; i++)
 	{
@@ -87,11 +89,11 @@ void Solver::project(float u[], float v[], float p[], float div[], float object[
 			v[IX_DIM(i, j)] -= 0.5f * m_NumCells * (p[IX_DIM(i, j + 1)] - p[IX_DIM(i, j - 1)]);
 		}
 	}
-	set_bnd(1, u, object, movingObject);
-	set_bnd(2, v, object, movingObject);
+	set_bnd(1, u, object, movings);
+	set_bnd(2, v, object, movings);
 }
 
-void Solver::advect(int b, float d[], float d0[], float u[], float v[], float object[], MovingObject *movingObject)
+void Solver::advect(int b, float d[], float d0[], float u[], float v[], float object[], std::vector<MovingObject*> movings )
 {
 	int i0, j0, i1, j1;
 	float x, y, s0, t0, s1, t1, dt0;
@@ -119,16 +121,16 @@ void Solver::advect(int b, float d[], float d0[], float u[], float v[], float ob
 				s1 * (t0 * d0[IX_DIM(i1, j0)] + t1 * d0[IX_DIM(i1, j1)]);
 		}
 	}
-	set_bnd(b, d, object, movingObject);
+	set_bnd(b, d, object, movings);
 }
 
-void Solver::Diffuse(int b, float x[], float x0[], float object[], MovingObject *movingObject)
+void Solver::Diffuse(int b, float x[], float x0[], float object[], std::vector<MovingObject*> movings )
 {
 	float a = m_Dt * m_Viscosity * m_NumCells * m_NumCells;
-	lin_solve(b, x, x0, object, movingObject, a, 1 + 4 * a);
+	lin_solve(b, x, x0, object, movings, a, 1 + 4 * a);
 }
 
-void Solver::lin_solve(int b, float x[], float x0[], float object[], MovingObject *movingObject, float a, float c)
+void Solver::lin_solve(int b, float x[], float x0[], float object[], std::vector<MovingObject*> movings, float a, float c)
 {
 	for (int k = 0; k < 20; k++)
 	{
@@ -146,11 +148,11 @@ void Solver::lin_solve(int b, float x[], float x0[], float object[], MovingObjec
 			}
 		}
 
-		set_bnd(b, x, object, movingObject);
+		set_bnd(b, x, object, movings);
 	}
 }
 
-void Solver::set_bnd(int b, float x[], float object[], MovingObject *movingObject)
+void Solver::set_bnd(int b, float x[], float object[], std::vector<MovingObject*> movings )
 {
 	int i, j;
 
@@ -187,6 +189,14 @@ void Solver::set_bnd(int b, float x[], float object[], MovingObject *movingObjec
 	{
 		for (j = 2; j <= m_NumCells - 1; j++)
 		{
+			int size = movings.size();
+			for (int z = 0; z < size; z++)
+			{
+				if (movings[z]->pnpoly(4, i, j))
+				{
+					x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelocityX(i, j, x) : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensity(i, j, x);
+				}
+			}
 		}
 	}
 

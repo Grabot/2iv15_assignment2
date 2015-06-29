@@ -7,6 +7,9 @@ using namespace std;
 #include "FieldToolbox.h"
 #include "imageio.h"
 
+#include <algorithm>
+#include <list>
+#include <vector>
 #include <stdlib.h>
 #include <stdio.h>
 #include <Windows.h>
@@ -38,7 +41,8 @@ long long level_elapsed_time = 0;
 long long level_start_time = 0;
 
 Solver *solver;
-MovingObject *movingObject;
+std::vector<MovingObject*> movings; 
+//std::list<MovingObject*> movings;
 
 static int win_id;
 static int win_x, win_y;
@@ -66,12 +70,22 @@ static void clear_data ( void )
 	{
 		u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = object[i] = 0.0f;
 	}
+
 }
 
 static int allocate_data ( void )
 {
 	solver = new Solver(N, visc, dt);
-	movingObject = new MovingObject(Vec2f(0.5, 0.5), 0.1, 0.0015, 0.001);
+	//first block showing
+	movings.push_back(new MovingObject(Vec2f(0.5, 0.5), 0.3, 0.001, 0.0, 0));
+	//second smaller block showing moving around
+	//movings.push_back(new MovingObject(Vec2f(0.3, 0.2), 0.2, -0.002, 0.003, 0));
+	//third (three) even smaller blocks showing moving around!!!!
+	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.1, 0.001, -0.003, 0));
+	//movings.push_back(new MovingObject(Vec2f(0.6, 0.8), 0.1, -0.002, 0.002, 0));
+	//movings.push_back(new MovingObject(Vec2f(0.5, 0.4), 0.1, 0.004, 0.001, 0));
+	//fourth small blocks showing moving around and rotating!!!!!
+	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.1, 0.005, -0.003, 1));
 	int size = (N + 2) * (N + 2);
 
 	u = new float[size];
@@ -156,7 +170,13 @@ static void draw_object(void)
 	}
 	glEnd();
 
-	movingObject->draw();
+	//movingObject->draw();
+
+	int size = movings.size();
+	for (int i = 0; i < size; i++)
+	{
+		movings[i]->draw();
+	}
 }
 static void draw_velocity ( void )
 {
@@ -202,10 +222,10 @@ static void draw_density ( void )
 			d10 = dens[IX(i + 1, j)];
 			d11 = dens[IX(i + 1, j + 1)];
 
-			glColor3f ( d00, d00, d00 ); glVertex2f ( x, y );
-			glColor3f ( d10, d10, d10 ); glVertex2f ( x+h, y );
-			glColor3f ( d11, d11, d11 ); glVertex2f ( x+h, y+h );
-			glColor3f ( d01, d01, d01 ); glVertex2f ( x, y+h );
+			glColor3f(d00, d00, d00); glVertex2f(x, y);
+			glColor3f(d10, d10, d10); glVertex2f(x + h, y);
+			glColor3f(d11, d11, d11); glVertex2f(x + h, y + h);
+			glColor3f(d01, d01, d01); glVertex2f(x, y + h);
 		}
 	}
 
@@ -234,10 +254,10 @@ static void get_from_UI( float d[], float u[], float v[] )
 	if ( i<1 || i>N || j<1 || j>N ) return;
 
 	if ( mouse_down[0] ) {
-		movingObject->collisionObject(i, j);
-
 		u[IX(i, j)] = force*(mx - omx);
 		v[IX(i, j)] = force*(omy - my);
+
+		cout << "mouse x: " << i << " mouse y: " << j << " collision?: " << movings[0] -> pnpoly(4, i, j ) << endl;
 	}
 
 	if (mouse_down[2] && buttonW == 1)
@@ -329,9 +349,14 @@ static void reshape_func ( int width, int height )
 static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
-	movingObject->MoveStep();
-	solver->velStep(u, v, u_prev, v_prev, object, movingObject);
-	solver->densStep(dens, dens_prev, u, v, object, movingObject);
+	int size = movings.size();
+	for (int i = 0; i < size; i++)
+	{
+		movings[i]->MoveStep();
+	}
+	//movingObject->MoveStep();
+	solver->velStep(u, v, u_prev, v_prev, object, movings);
+	solver->densStep(dens, dens_prev, u, v, object, movings);
 	
 	glutSetWindow ( win_id );
 	glutPostRedisplay ();
