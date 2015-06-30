@@ -13,12 +13,23 @@ Cloth::Cloth(vector<Particle*> pVector)
 	{
 		m_Corners = m_Vectors;
 	}
-	if (m_Vectors.size() == 9)
+	else if (m_Vectors.size() == 9)
 	{
 		m_Corners.push_back(m_Vectors[0]);
 		m_Corners.push_back(m_Vectors[2]);
 		m_Corners.push_back(m_Vectors[8]);
 		m_Corners.push_back(m_Vectors[6]);
+	}
+	else if (m_Vectors.size() == 16)
+	{
+		m_Corners.push_back(m_Vectors[0]);
+		m_Corners.push_back(m_Vectors[3]);
+		m_Corners.push_back(m_Vectors[15]);
+		m_Corners.push_back(m_Vectors[12]);
+	}
+	else
+	{
+		cout << "Wrong amount of particles" << endl;
 	}
 }
 

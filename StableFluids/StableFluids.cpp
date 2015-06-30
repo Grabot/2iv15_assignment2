@@ -119,8 +119,8 @@ static int allocate_data ( void )
 
 	level_start_time = timeGetTime();
 
-	int clothWidth = 3;
-	int clothHeight = 3;
+	int clothWidth = 4;
+	int clothHeight = 4;
 	int ks = 2;
 	int kd = 2;
 	float distance = 0.2;
