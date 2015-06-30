@@ -7,7 +7,7 @@
 #include "linearSolver.h"
 using namespace std;
 
-//void ComputeConstraint(std::vector<Particle*> pVector, std::vector<Constraint*> constraints);
+void ComputeConstraint(std::vector<Particle*> pVector, std::vector<Constraint*> constraints);
 void ClearForceAccumulators(std::vector<Particle*> pVector);
 void ApplyForce(std::vector<Force*> forces);
 
@@ -16,7 +16,7 @@ void CalculateForces(std::vector<Force*> forces, std::vector<Constraint*> constr
 	//DerivEval loop, first clear force accumelators and than apply forces, finnaly calcualte constraints
 	ClearForceAccumulators(pVector);
 	ApplyForce(forces);
-	//ComputeConstraint(pVector, constraints);
+	ComputeConstraint(pVector, constraints);
 }
 
 void ClearForceAccumulators(std::vector<Particle*> pVector)

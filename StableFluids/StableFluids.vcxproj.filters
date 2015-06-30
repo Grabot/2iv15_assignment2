@@ -54,6 +54,15 @@
     <ClCompile Include="CalculateForces.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DragForce.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputeConstraint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpringForce.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FieldToolbox.h">
@@ -87,6 +96,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CircularWireConstraint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DragForce.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpringForce.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -90,6 +90,8 @@
   <ItemGroup>
     <ClCompile Include="CalculateForces.cpp" />
     <ClCompile Include="CircularWireConstraint.cpp" />
+    <ClCompile Include="ComputeConstraint.cpp" />
+    <ClCompile Include="DragForce.cpp" />
     <ClCompile Include="FieldToolbox.cpp" />
     <ClCompile Include="Gravity.cpp" />
     <ClCompile Include="imageio.cpp" />
@@ -100,11 +102,13 @@
     <ClCompile Include="ParticleSolver.cpp" />
     <ClCompile Include="Schemes.cpp" />
     <ClCompile Include="Solver.cpp" />
+    <ClCompile Include="SpringForce.cpp" />
     <ClCompile Include="StableFluids.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CircularWireConstraint.h" />
     <ClInclude Include="Constraint.h" />
+    <ClInclude Include="DragForce.h" />
     <ClInclude Include="FieldToolbox.h" />
     <ClInclude Include="Force.h" />
     <ClInclude Include="Gravity.h" />
@@ -114,6 +118,7 @@
     <ClInclude Include="MovingObject.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Solver.h" />
+    <ClInclude Include="SpringForce.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

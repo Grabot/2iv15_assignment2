@@ -11,6 +11,8 @@ using namespace std;
 
 #include "Particle.h"
 #include "MouseForce.h"
+#include "Dragforce.h"
+#include "SpringForce.h"
 
 #include <algorithm>
 #include <list>
@@ -111,13 +113,26 @@ static int allocate_data ( void )
 	rotation[1] = -1;
 
 	int particleID = 0;
-	pVector.push_back(new Particle(Vec2f(0.5, 0.5), 1.0f, particleID++, 0));
-	pVector.push_back(new Particle(Vec2f(0.8, 0.9), 1.0f, particleID++, 0));
+	pVector.push_back(new Particle(Vec2f(0.4, 0.4), 1.0f, particleID++, 0));
+	pVector.push_back(new Particle(Vec2f(0.4, 0.6), 1.0f, particleID++, 0));
+	pVector.push_back(new Particle(Vec2f(0.6, 0.6), 1.0f, particleID++, 0));
+	pVector.push_back(new Particle(Vec2f(0.6, 0.4), 1.0f, particleID++, 0));
 	int i, sizeP = pVector.size();
 	for (i = 0; i<sizeP; i++)
 	{
 		mouses.push_back(new MouseForce(pVector[i], pVector[i]->m_Velocity, 0.5, 0.5));
 	}
+	for (i = 0; i<sizeP; i++)
+	{
+		forces.push_back(new DragForce(pVector[i], 0.99));
+	}
+
+	forces.push_back(new SpringForce(pVector[0], pVector[1], 0.2, 2, 2, 0));
+	forces.push_back(new SpringForce(pVector[1], pVector[2], 0.2, 2, 2, 0));
+	forces.push_back(new SpringForce(pVector[2], pVector[3], 0.2, 2, 2, 0));
+	forces.push_back(new SpringForce(pVector[3], pVector[0], 0.2, 2, 2, 0));
+	forces.push_back(new SpringForce(pVector[0], pVector[2], 0.283, 2, 2, 0));
+	forces.push_back(new SpringForce(pVector[1], pVector[3], 0.283, 2, 2, 0));
 
 	int size = (N + 2) * (N + 2);
 
@@ -270,7 +285,6 @@ static void draw_particles(void)
 
 static void draw_forces(void)
 {
-	/*
 	for_each(forces.begin(), forces.end(), [](Force* f)
 	{
 		f->draw();
@@ -280,7 +294,7 @@ static void draw_forces(void)
 	{
 		c->draw();
 	});
-	*/
+
 	for_each(mouses.begin(), mouses.end(), [](MouseForce* m)
 	{
 		m->draw();
