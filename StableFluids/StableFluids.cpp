@@ -98,10 +98,138 @@ static void clear_data ( void )
 
 }
 
-static int allocate_data ( void )
+static int allocate_data ( int input )
 {
 	solver = new Solver(N, visc, dt);
 
+	int size = (N + 2) * (N + 2);
+
+	u = new float[size];
+	v = new float[size];
+	u_prev = new float[size];
+	v_prev = new float[size];
+	dens = new float[size];
+	dens_prev = new float[size];
+	object = new float[size];
+
+	FieldToolbox::Create();
+	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2));
+	//movings.push_back(new MovingObject(Vec2f(0.2, 0.3), 0.2));
+
+	if (input == 1)
+	{
+
+	}
+
+	xSpeed = new float[movings.size()];
+	ySpeed = new float[movings.size()];
+	rotation = new float[movings.size()];
+	xSpeed[0] = 0.00;
+	ySpeed[0] = 0.00;
+	rotation[0] = 2;
+	xSpeed[1] = 0.00;
+	ySpeed[1] = 0.00;
+	rotation[1] = -1;
+
+	const double dist = 0.2;
+
+	level_start_time = timeGetTime();
+
+	int clothWidth = 4;
+	int clothHeight = 4;
+	int ks = 2;
+	int kd = 2;
+	float distance = 0.2;
+	float heigthOff = 0.2;
+	float clothDist = 0.2f;
+	int particleID = 0;
+
+	for (int i = 0; i < clothWidth*clothHeight; i++)
+	{
+		if (i % clothWidth == 0)
+		{
+			heigthOff += 0.2;
+			distance = 0.0;
+		}
+
+		pVector.push_back(new Particle(Vec2f(0.3 + distance, 0.9 - heigthOff), 1.0f, particleID++, 0));
+		distance += 0.2;
+	}
+	// You shoud replace these with a vector generalized forces and one of
+	// constraints...
+
+	int i, sizeP = pVector.size();
+
+	for (i = 0; i<sizeP; i++)
+	{
+		mouses.push_back(new MouseForce(pVector[i], pVector[i]->m_Velocity, 0.5, 0.5));
+	}
+
+	//connect particles to the one next to him vertically
+	for (int i = 0; i < (clothWidth*clothHeight) - clothWidth; i++)
+	{
+		forces.push_back(new SpringForce(pVector[i], pVector[i + clothWidth], clothDist, ks, kd, 0));
+	}
+
+	//connect particles with the one below him
+	for (int i = 0; i < clothHeight; i++)
+	{
+		for (int j = 0; j < clothWidth - 1; j++)
+		{
+			forces.push_back(new SpringForce(pVector[j + (clothWidth * i)], pVector[j + (clothWidth * i) + 1], clothDist, ks, kd, 0));
+		}
+	}
+
+	//connects vertically particles with the particle after it's next one
+	for (int i = 0; i < clothHeight; i++)
+	{
+		for (int j = 0; j < clothWidth - 2; j++)
+		{
+			forces.push_back(new SpringForce(pVector[j + (i*clothWidth)], pVector[j + 2 + (i*clothWidth)], clothDist * 2, ks, kd, 0));
+		}
+	}
+
+	//connect horizontally particles with the particle after it's next one
+	for (int i = 0; i < clothHeight - 2; i++)
+	{
+		for (int j = 0; j < clothWidth; j++)
+		{
+			forces.push_back(new SpringForce(pVector[j + (clothWidth*i)], pVector[j + (clothWidth*i) + (clothWidth * 2)], clothDist * 2, ks, kd, 0));
+		}
+	}
+
+	//cross connection left to right
+	float clothDistCross = sqrt(clothDist*clothDist + clothDist*clothDist);
+	for (int i = 0; i < clothWidth - 1; i++)
+	{
+		for (int j = 0; j < clothHeight - 1; j++)
+		{
+			forces.push_back(new SpringForce(pVector[i + (j*clothWidth)], pVector[i + 1 + ((j + 1)*clothWidth)], clothDistCross, ks, kd, 0));
+		}
+	}
+
+	//cross connection right to left
+	for (int i = 0; i < clothWidth - 1; i++)
+	{
+		for (int j = 0; j < clothHeight - 1; j++)
+		{
+			forces.push_back(new SpringForce(pVector[i + 1 + (j*clothWidth)], pVector[i + ((j + 1)*clothWidth)], clothDistCross, ks, kd, 0));
+		}
+	}
+
+	for (i = 0; i<sizeP; i++)
+	{
+		forces.push_back(new DragForce(pVector[i], 0.99));
+	}
+
+	cloth = new Cloth(pVector);
+
+	return (1);
+}
+
+static int allocate_data1(void)
+{
+	solver = new Solver(N, visc, dt);
 	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2));
 	//movings.push_back(new MovingObject(Vec2f(0.2, 0.3), 0.2));
 
@@ -219,8 +347,9 @@ static int allocate_data ( void )
 	object = new float[size];
 
 	FieldToolbox::Create();
-	return ( 1 );
+	return (1);
 }
+
 
 
 /*
@@ -737,9 +866,13 @@ int main ( int argc, char ** argv )
 	printf ( "\t Clear the simulation by pressing the 'c' key\n" );
 	printf ( "\t Quit by pressing the 'q' key\n" );
 
-	dvel = 0;
+	printf("\t for the simulation without objects, particles, or velocity confinement give 1 'c' key\n");
 
-	if ( !allocate_data () ) exit ( 1 );
+	int input;
+	cin >> input;
+
+	dvel = 0;
+	allocate_data( input );
 	clear_data ();
 
 	win_x = 512;
