@@ -13,6 +13,8 @@ using namespace std;
 #include "MouseForce.h"
 #include "Dragforce.h"
 #include "SpringForce.h"
+#include "Gravity.h"
+#include "Cloth.h"
 
 #include <algorithm>
 #include <list>
@@ -62,6 +64,7 @@ long long level_start_time = 0;
 Vec2f MousePos;
 Solver *solver;
 std::vector<MovingObject*> movings; 
+Cloth *cloth;
 //std::list<MovingObject*> movings;
 
 static int win_id;
@@ -126,6 +129,10 @@ static int allocate_data ( void )
 	{
 		forces.push_back(new DragForce(pVector[i], 0.99));
 	}
+	for (i = 0; i<sizeP; i++)
+	{
+		forces.push_back(new Gravity(pVector[i], Vec2f(0.0, -0.0981)));
+	}
 
 	forces.push_back(new SpringForce(pVector[0], pVector[1], 0.2, 2, 2, 0));
 	forces.push_back(new SpringForce(pVector[1], pVector[2], 0.2, 2, 2, 0));
@@ -133,6 +140,10 @@ static int allocate_data ( void )
 	forces.push_back(new SpringForce(pVector[3], pVector[0], 0.2, 2, 2, 0));
 	forces.push_back(new SpringForce(pVector[0], pVector[2], 0.283, 2, 2, 0));
 	forces.push_back(new SpringForce(pVector[1], pVector[3], 0.283, 2, 2, 0));
+
+	constraints.push_back(new CircularWireConstraint(pVector[0], Vec2f(0.5,0.8), 0.3));
+
+	cloth = new Cloth(pVector);
 
 	int size = (N + 2) * (N + 2);
 
@@ -299,6 +310,8 @@ static void draw_forces(void)
 	{
 		m->draw();
 	});
+
+	cloth->draw( true );
 }
 
 /*

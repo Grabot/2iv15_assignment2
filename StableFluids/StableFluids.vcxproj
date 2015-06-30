@@ -90,6 +90,7 @@
   <ItemGroup>
     <ClCompile Include="CalculateForces.cpp" />
     <ClCompile Include="CircularWireConstraint.cpp" />
+    <ClCompile Include="Cloth.cpp" />
     <ClCompile Include="ComputeConstraint.cpp" />
     <ClCompile Include="DragForce.cpp" />
     <ClCompile Include="FieldToolbox.cpp" />
@@ -107,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CircularWireConstraint.h" />
+    <ClInclude Include="Cloth.h" />
     <ClInclude Include="Constraint.h" />
     <ClInclude Include="DragForce.h" />
     <ClInclude Include="FieldToolbox.h" />
