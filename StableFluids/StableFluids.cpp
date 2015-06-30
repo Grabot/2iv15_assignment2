@@ -360,7 +360,7 @@ static void get_from_UI( float d[], float u[], float v[] )
 
 			float distance = xDis*xDis + yDis*yDis;
 
-			if (distance < 0.01)
+			if (distance < 0.005)
 			{
 				particleSelected = i;
 			}
@@ -379,6 +379,7 @@ static void get_from_UI( float d[], float u[], float v[] )
 			}
 
 		}
+
 	}
 	else
 	{
