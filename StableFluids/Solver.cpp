@@ -21,12 +21,15 @@ Solver::Solver(int a_NumCells, float a_Viscosity, float a_Dt)
 	}
 }
 
-void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[], std::vector<MovingObject*> movings, Cloth *cloth )
+void Solver::velStep(bool vor, float u[], float v[], float u0[], float v0[], float object[], std::vector<MovingObject*> movings, Cloth *cloth )
 {
 	AddField(u, u0);
 	AddField(v, v0);
 
-	//vorticityConfinement( u, v );
+	if (vor)
+	{
+		vorticityConfinement( u, v );
+	}
 
 	float *temp;
 	temp = u0;
@@ -195,62 +198,64 @@ void Solver::set_bnd(int b, float x[], float object[], std::vector<MovingObject*
 	{
 		for (j = 2; j <= m_NumCells - 1; j++)
 		{
-			if (cloth->pnpoly(4, i, j))
+			if (!cloth == NULL)
 			{
-				/*
-				we will look for the edge blocks of the
-				*/
-				if (!cloth->pnpoly(4, i + 1, j))
+				if (cloth->pnpoly(4, i, j))
 				{
-					//edge block on the right side, with possibility of being askew
-					if (!cloth->pnpoly(4, i, j + 1))
+					/*
+					we will look for the edge blocks of the
+					*/
+					if (!cloth->pnpoly(4, i + 1, j))
 					{
-						x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXRight(i, j, x) : (b == 2) ? cloth->GetVelYDown(i, j, x) : cloth->GetVelocityDensityXRight(i, j, x);
+						//edge block on the right side, with possibility of being askew
+						if (!cloth->pnpoly(4, i, j + 1))
+						{
+							x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXRight(i, j, x) : (b == 2) ? cloth->GetVelYDown(i, j, x) : cloth->GetVelocityDensityXRight(i, j, x);
+						}
+						else if (!cloth->pnpoly(4, i, j - 1))
+						{
+							x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXRight(i, j, x) : (b == 2) ? cloth->GetVelYUp(i, j, x) : cloth->GetVelocityDensityXRight(i, j, x);
+						}
+						else
+						{
+							x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXRight(i, j, x) : (b == 2) ? 0 : cloth->GetVelocityDensityXRight(i, j, x);
+						}
+					}
+					else if (!cloth->pnpoly(4, i - 1, j))
+					{
+						//edge block on the left side, with possibility being askew
+						if (!cloth->pnpoly(4, i, j + 1))
+						{
+							x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXLeft(i, j, x) : (b == 2) ? cloth->GetVelYDown(i, j, x) : cloth->GetVelocityDensityXLeft(i, j, x);
+						}
+						else if (!cloth->pnpoly(4, i, j - 1))
+						{
+							x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXLeft(i, j, x) : (b == 2) ? cloth->GetVelYUp(i, j, x) : cloth->GetVelocityDensityXLeft(i, j, x);
+						}
+						else
+						{
+							x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXLeft(i, j, x) : (b == 2) ? 0 : cloth->GetVelocityDensityXLeft(i, j, x);
+						}
 					}
 					else if (!cloth->pnpoly(4, i, j - 1))
 					{
-						x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXRight(i, j, x) : (b == 2) ? cloth->GetVelYUp(i, j, x) : cloth->GetVelocityDensityXRight(i, j, x);
+						//edge block on the top side, we assume we have all possibilities
+						x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? cloth->GetVelYUp(i, j, x) : cloth->GetVelocityDensityYUp(i, j, x);
 					}
-					else
+					else if (!cloth->pnpoly(4, i, j + 1))
 					{
-						x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXRight(i, j, x) : (b == 2) ? 0 : cloth->GetVelocityDensityXRight(i, j, x);
+						//edge block on the bottom side, we assume we have all possibilities
+						x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? cloth->GetVelYDown(i, j, x) : cloth->GetVelocityDensityYDown(i, j, x);
 					}
-				}
-				else if (!cloth->pnpoly(4, i - 1, j))
-				{
-					//edge block on the left side, with possibility being askew
-					if (!cloth->pnpoly(4, i, j + 1))
-					{
-						x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXLeft(i, j, x) : (b == 2) ? cloth->GetVelYDown(i, j, x) : cloth->GetVelocityDensityXLeft(i, j, x);
-					}
-					else if (!cloth->pnpoly(4, i, j - 1))
-					{
-						x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXLeft(i, j, x) : (b == 2) ? cloth->GetVelYUp(i, j, x) : cloth->GetVelocityDensityXLeft(i, j, x);
-					}
-					else
-					{
-						x[IX_DIM(i, j)] = b == 1 ? cloth->GetVelXLeft(i, j, x) : (b == 2) ? 0 : cloth->GetVelocityDensityXLeft(i, j, x);
-					}
-				}
-				else if (!cloth->pnpoly(4, i, j - 1))
-				{
-					//edge block on the top side, we assume we have all possibilities
-					x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? cloth->GetVelYUp(i, j, x) : cloth->GetVelocityDensityYUp(i, j, x);
-				}
-				else if (!cloth->pnpoly(4, i, j + 1))
-				{
-					//edge block on the bottom side, we assume we have all possibilities
-					x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? cloth->GetVelYDown(i, j, x) : cloth->GetVelocityDensityYDown(i, j, x);
-				}
 
-				//block is completely inside the block
-				if (cloth->pnpoly(4, i - 1, j) && cloth->pnpoly(4, i + 1, j) && cloth->pnpoly(4, i, j + 1) && cloth->pnpoly(4, i, j - 1))
-				{
-					x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? 0 : 0;
+					//block is completely inside the block
+					if (cloth->pnpoly(4, i - 1, j) && cloth->pnpoly(4, i + 1, j) && cloth->pnpoly(4, i, j + 1) && cloth->pnpoly(4, i, j - 1))
+					{
+						x[IX_DIM(i, j)] = b == 1 ? 0 : (b == 2) ? 0 : 0;
+					}
+					//x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelocityX(i, j, x) : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensity(i, j, x);
 				}
-				//x[IX_DIM(i, j)] = b == 1 ? movings[z]->GetVelocityX(i, j, x) : (b == 2) ? movings[z]->GetVelocityY(i, j, x) : movings[z]->GetVelocityDensity(i, j, x);
 			}
-
 			int size = movings.size();
 			for (int z = 0; z < size; z++)
 			{

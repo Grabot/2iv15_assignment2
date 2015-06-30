@@ -44,6 +44,9 @@ float *xSpeed;
 float *ySpeed;
 float *rotation;
 
+bool mouseVelocity;
+bool vor;
+
 static int N;
 static float dt, diff, visc;
 static float force, source;
@@ -98,50 +101,28 @@ static void clear_data ( void )
 
 }
 
-static int allocate_data ( int input )
+void SetupBasic()
 {
-	solver = new Solver(N, visc, dt);
+	level_start_time = timeGetTime();
+	mouseVelocity = true;
+	vor = false;
+}
 
-	int size = (N + 2) * (N + 2);
-
-	u = new float[size];
-	v = new float[size];
-	u_prev = new float[size];
-	v_prev = new float[size];
-	dens = new float[size];
-	dens_prev = new float[size];
-	object = new float[size];
-
-	FieldToolbox::Create();
-	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2));
-	//movings.push_back(new MovingObject(Vec2f(0.2, 0.3), 0.2));
-
-	if (input == 1)
-	{
-
-	}
-
-	xSpeed = new float[movings.size()];
-	ySpeed = new float[movings.size()];
-	rotation = new float[movings.size()];
-	xSpeed[0] = 0.00;
-	ySpeed[0] = 0.00;
-	rotation[0] = 2;
-	xSpeed[1] = 0.00;
-	ySpeed[1] = 0.00;
-	rotation[1] = -1;
-
-	const double dist = 0.2;
+void SetupCloth44()
+{
+	const double dist = 0.1;
 
 	level_start_time = timeGetTime();
+	mouseVelocity = false;
+	vor = true;
 
 	int clothWidth = 4;
 	int clothHeight = 4;
 	int ks = 2;
 	int kd = 2;
-	float distance = 0.2;
-	float heigthOff = 0.2;
-	float clothDist = 0.2f;
+	float distance = 0.1;
+	float heigthOff = 0.1;
+	float clothDist = 0.1f;
 	int particleID = 0;
 
 	for (int i = 0; i < clothWidth*clothHeight; i++)
@@ -223,6 +204,33 @@ static int allocate_data ( int input )
 	}
 
 	cloth = new Cloth(pVector);
+}
+
+static int allocate_data ( int input )
+{
+	solver = new Solver(N, visc, dt);
+
+	int size = (N + 2) * (N + 2);
+
+	u = new float[size];
+	v = new float[size];
+	u_prev = new float[size];
+	v_prev = new float[size];
+	dens = new float[size];
+	dens_prev = new float[size];
+	object = new float[size];
+
+	FieldToolbox::Create();
+
+	if (input == 1)
+	{
+		SetupBasic();
+	}
+	else
+	{
+		SetupCloth44();
+	}
+
 
 	return (1);
 }
@@ -335,18 +343,6 @@ static int allocate_data1(void)
 	}
 
 	cloth = new Cloth(pVector);
-
-	int size = (N + 2) * (N + 2);
-
-	u = new float[size];
-	v = new float[size];
-	u_prev = new float[size];
-	v_prev = new float[size];
-	dens = new float[size];
-	dens_prev = new float[size];
-	object = new float[size];
-
-	FieldToolbox::Create();
 	return (1);
 }
 
@@ -533,10 +529,12 @@ static void get_from_UI( float d[], float u[], float v[] )
 
 	if ( mouse_down[0] ) 
 	{
-		/*
-		u[IX(i, j)] = force*(mx - omx);
-		v[IX(i, j)] = force*(omy - my);
-		*/
+		if (mouseVelocity)
+		{
+			u[IX(i, j)] = force*(mx - omx);
+			v[IX(i, j)] = force*(omy - my);
+		}
+		
 
 		x = (float)((float)i / 64);
 		y = (float)((float)j / 64);
@@ -642,6 +640,11 @@ static void key_func ( unsigned char key, int x, int y )
 	case 'V':
 		dvel = !dvel;
 		break;
+
+	case 'r':
+	case 'R':
+		vor = !vor;
+		break;
 	}
 }
 
@@ -746,7 +749,7 @@ static void idle_func ( void )
 	simulation_step(pVector, forces, constraints, dt, 1);
 	MoveObjects();
 	//twoWayCoupling();
-	solver->velStep(u, v, u_prev, v_prev, object, movings, cloth);
+	solver->velStep( vor, u, v, u_prev, v_prev, object, movings, cloth);
 	solver->densStep(dens, dens_prev, u, v, object, movings, cloth);
 	
 	glutSetWindow ( win_id );
