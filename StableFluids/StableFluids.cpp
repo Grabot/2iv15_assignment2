@@ -551,8 +551,8 @@ static void idle_func ( void )
 	simulation_step(pVector, forces, constraints, dt, 1);
 	MoveObjects();
 	//twoWayCoupling();
-	solver->velStep(u, v, u_prev, v_prev, object, movings);
-	solver->densStep(dens, dens_prev, u, v, object, movings);
+	solver->velStep(u, v, u_prev, v_prev, object, movings, cloth);
+	solver->densStep(dens, dens_prev, u, v, object, movings, cloth);
 	
 	glutSetWindow ( win_id );
 	glutPostRedisplay ();

@@ -17,7 +17,7 @@ Solver::Solver(int a_NumCells, float a_Viscosity, float a_Dt)
 	}
 }
 
-void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[], std::vector<MovingObject*> movings )
+void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[], std::vector<MovingObject*> movings, Cloth *cloth )
 {
 	AddField(u, u0);
 	AddField(v, v0);
@@ -29,15 +29,15 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 	u0 = u;
 	u = temp;
 
-	Diffuse(1, u, u0, object, movings);
+	Diffuse(1, u, u0, object, movings, cloth);
 
 	temp = v0;
 	v0 = v;
 	v = temp;
 
-	Diffuse(2, v, v0, object, movings);
+	Diffuse(2, v, v0, object, movings, cloth);
 
-	project(u, v, u0, v0, object, movings);
+	project(u, v, u0, v0, object, movings, cloth);
 
 	temp = u0;
 	u0 = u;
@@ -47,27 +47,27 @@ void Solver::velStep(float u[], float v[], float u0[], float v0[], float object[
 	v0 = v;
 	v = temp;
 
-	advect(1, u, u0, u0, v0, object, movings);
-	advect(2, v, v0, u0, v0, object, movings);
-	project(u, v, u0, v0, object, movings);
+	advect(1, u, u0, u0, v0, object, movings, cloth);
+	advect(2, v, v0, u0, v0, object, movings, cloth);
+	project(u, v, u0, v0, object, movings, cloth);
 
 }
 
-void Solver::densStep(float x[], float x0[], float u[], float v[], float object[], std::vector<MovingObject*> movings )
+void Solver::densStep(float x[], float x0[], float u[], float v[], float object[], std::vector<MovingObject*> movings, Cloth *cloth )
 {
 	AddField(x, x0);
 	float *temp;
 	temp = x0;
 	x0 = x;
 	x = temp;
-	Diffuse(0, x, x0, object, movings);
+	Diffuse(0, x, x0, object, movings, cloth);
 	temp = x0;
 	x0 = x;
 	x = temp;
-	advect(0, x, x0, u, v, object, movings);
+	advect(0, x, x0, u, v, object, movings, cloth);
 }
 
-void Solver::project(float u[], float v[], float p[], float div[], float object[], std::vector<MovingObject*> movings )
+void Solver::project(float u[], float v[], float p[], float div[], float object[], std::vector<MovingObject*> movings, Cloth *cloth )
 {
 
 	for (int i = 1; i <= m_NumCells; i++)
@@ -78,10 +78,10 @@ void Solver::project(float u[], float v[], float p[], float div[], float object[
 			p[IX_DIM(i, j)] = 0;
 		}
 	}
-	set_bnd(0, div, object, movings);
-	set_bnd(0, p, object, movings);
+	set_bnd(0, div, object, movings, cloth);
+	set_bnd(0, p, object, movings, cloth);
 
-	lin_solve(0, p, div, object, movings, 1, 4);
+	lin_solve(0, p, div, object, movings, cloth, 1, 4);
 
 	for (int i = 1; i <= m_NumCells; i++)
 	{
@@ -91,11 +91,11 @@ void Solver::project(float u[], float v[], float p[], float div[], float object[
 			v[IX_DIM(i, j)] -= 0.5f * m_NumCells * (p[IX_DIM(i, j + 1)] - p[IX_DIM(i, j - 1)]);
 		}
 	}
-	set_bnd(1, u, object, movings);
-	set_bnd(2, v, object, movings);
+	set_bnd(1, u, object, movings, cloth);
+	set_bnd(2, v, object, movings, cloth);
 }
 
-void Solver::advect(int b, float d[], float d0[], float u[], float v[], float object[], std::vector<MovingObject*> movings )
+void Solver::advect(int b, float d[], float d0[], float u[], float v[], float object[], std::vector<MovingObject*> movings, Cloth *cloth )
 {
 	int i0, j0, i1, j1;
 	float x, y, s0, t0, s1, t1, dt0;
@@ -123,16 +123,16 @@ void Solver::advect(int b, float d[], float d0[], float u[], float v[], float ob
 				s1 * (t0 * d0[IX_DIM(i1, j0)] + t1 * d0[IX_DIM(i1, j1)]);
 		}
 	}
-	set_bnd(b, d, object, movings);
+	set_bnd(b, d, object, movings, cloth);
 }
 
-void Solver::Diffuse(int b, float x[], float x0[], float object[], std::vector<MovingObject*> movings )
+void Solver::Diffuse(int b, float x[], float x0[], float object[], std::vector<MovingObject*> movings, Cloth *cloth )
 {
 	float a = m_Dt * m_Viscosity * m_NumCells * m_NumCells;
-	lin_solve(b, x, x0, object, movings, a, 1 + 4 * a);
+	lin_solve(b, x, x0, object, movings, cloth, a, 1 + 4 * a);
 }
 
-void Solver::lin_solve(int b, float x[], float x0[], float object[], std::vector<MovingObject*> movings, float a, float c)
+void Solver::lin_solve(int b, float x[], float x0[], float object[], std::vector<MovingObject*> movings, Cloth *cloth, float a, float c)
 {
 	for (int k = 0; k < 20; k++)
 	{
@@ -150,11 +150,11 @@ void Solver::lin_solve(int b, float x[], float x0[], float object[], std::vector
 			}
 		}
 
-		set_bnd(b, x, object, movings);
+		set_bnd(b, x, object, movings, cloth);
 	}
 }
 
-void Solver::set_bnd(int b, float x[], float object[], std::vector<MovingObject*> movings )
+void Solver::set_bnd(int b, float x[], float object[], std::vector<MovingObject*> movings, Cloth *cloth )
 {
 	int i, j;
 
