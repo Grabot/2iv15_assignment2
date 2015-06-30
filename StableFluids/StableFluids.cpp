@@ -131,7 +131,7 @@ static int allocate_data ( void )
 	}
 	for (i = 0; i<sizeP; i++)
 	{
-		forces.push_back(new Gravity(pVector[i], Vec2f(0.0, -0.0981)));
+		//forces.push_back(new Gravity(pVector[i], Vec2f(0.0, -0.0981)));
 	}
 
 	forces.push_back(new SpringForce(pVector[0], pVector[1], 0.2, 2, 2, 0));
@@ -141,7 +141,7 @@ static int allocate_data ( void )
 	forces.push_back(new SpringForce(pVector[0], pVector[2], 0.283, 2, 2, 0));
 	forces.push_back(new SpringForce(pVector[1], pVector[3], 0.283, 2, 2, 0));
 
-	constraints.push_back(new CircularWireConstraint(pVector[0], Vec2f(0.5,0.8), 0.3));
+	//constraints.push_back(new CircularWireConstraint(pVector[0], Vec2f(0.5,0.8), 0.3));
 
 	cloth = new Cloth(pVector);
 
@@ -341,8 +341,10 @@ static void get_from_UI( float d[], float u[], float v[] )
 
 	if ( mouse_down[0] ) 
 	{
+		/*
 		u[IX(i, j)] = force*(mx - omx);
 		v[IX(i, j)] = force*(omy - my);
+		*/
 
 		x = (float)((float)i / 64);
 		y = (float)((float)j / 64);
