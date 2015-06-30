@@ -1,13 +1,13 @@
 #include <iostream>
 using namespace std;
 #include "MovingObject.h"
+#include "Particle.h"
 #include "Solver.h"
 #include <algorithm>
 #include <list>
 #include <vector>
 
 #define CREATE_DIM1 (new Vec2f[(a_NumCells+2)*(a_NumCells+2)])
-
 Solver::Solver(int a_NumCells, float a_Viscosity, float a_Dt) 
 	: m_NumCells(a_NumCells), m_Field(CREATE_DIM1), m_Viscosity(a_Viscosity), m_Dt(a_Dt)
 {

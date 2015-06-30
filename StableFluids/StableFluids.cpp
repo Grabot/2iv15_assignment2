@@ -6,6 +6,11 @@ using namespace std;
 #include "MovingObject.h"
 #include "FieldToolbox.h"
 #include "imageio.h"
+#include "Force.h"
+#include "CircularWireConstraint.h"
+
+#include "Particle.h"
+#include "MouseForce.h"
 
 #include <algorithm>
 #include <list>
@@ -16,6 +21,14 @@ using namespace std;
 #include <GL/glu.h>
 #include <GL/glut.h>
 
+// static Particle *pList;
+static std::vector<Particle*> pVector;
+
+std::vector<MouseForce*> mouses;
+std::vector<Force*> forces;
+std::vector<Constraint*> constraints;
+
+int particleSelected = -1;
 
 /* macros */
 
@@ -44,6 +57,7 @@ static int frame_number;
 long long level_elapsed_time = 0;
 long long level_start_time = 0;
 
+Vec2f MousePos;
 Solver *solver;
 std::vector<MovingObject*> movings; 
 //std::list<MovingObject*> movings;
@@ -53,6 +67,8 @@ static int win_x, win_y;
 static int mouse_down[3];
 static int omx, omy, mx, my;
 
+/* external definitions (from solver) */
+extern void simulation_step(std::vector<Particle*> pVector, std::vector<Force*> forces, std::vector<Constraint*> constraints, float dt, int solver);
 
 /*
 ----------------------------------------------------------------------
@@ -81,8 +97,8 @@ static int allocate_data ( void )
 {
 	solver = new Solver(N, visc, dt);
 
-	movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2));
-	movings.push_back(new MovingObject(Vec2f(0.2, 0.3), 0.2));
+	//movings.push_back(new MovingObject(Vec2f(0.4, 0.5), 0.2));
+	//movings.push_back(new MovingObject(Vec2f(0.2, 0.3), 0.2));
 
 	xSpeed = new float[movings.size()];
 	ySpeed = new float[movings.size()];
@@ -93,6 +109,15 @@ static int allocate_data ( void )
 	xSpeed[1] = 0.00;
 	ySpeed[1] = 0.00;
 	rotation[1] = -1;
+
+	int particleID = 0;
+	pVector.push_back(new Particle(Vec2f(0.5, 0.5), 1.0f, particleID++, 0));
+	pVector.push_back(new Particle(Vec2f(0.8, 0.9), 1.0f, particleID++, 0));
+	int i, sizeP = pVector.size();
+	for (i = 0; i<sizeP; i++)
+	{
+		mouses.push_back(new MouseForce(pVector[i], pVector[i]->m_Velocity, 0.5, 0.5));
+	}
 
 	int size = (N + 2) * (N + 2);
 
@@ -233,6 +258,35 @@ static void draw_density ( void )
 	glEnd ();
 }
 
+static void draw_particles(void)
+{
+	int size = pVector.size();
+
+	for (int i = 0; i< size; i++)
+	{
+		pVector[i]->draw();
+	}
+}
+
+static void draw_forces(void)
+{
+	/*
+	for_each(forces.begin(), forces.end(), [](Force* f)
+	{
+		f->draw();
+	});
+
+	for_each(constraints.begin(), constraints.end(), [](Constraint* c)
+	{
+		c->draw();
+	});
+	*/
+	for_each(mouses.begin(), mouses.end(), [](MouseForce* m)
+	{
+		m->draw();
+	});
+}
+
 /*
 ----------------------------------------------------------------------
 relates mouse movements to forces sources
@@ -243,20 +297,72 @@ static void get_from_UI( float d[], float u[], float v[] )
 {
 	int i, j, size = (N+2)*(N+2);
 
+	float x = 0;
+	float y = 0;
+
 	for ( i=0 ; i<size ; i++ ) {
 		u[i] = v[i] = d[i] = 0.0f;
 	}
 
-	if ( !mouse_down[0] && !mouse_down[2] ) return;
 
-	i = (int)((       mx /(float)win_x)*N+1);
-	j = (int)(((win_y-my)/(float)win_y)*N+1);
+	i = (int)((mx / (float)win_x)*N + 1);
+	j = (int)(((win_y - my) / (float)win_y)*N + 1);
 
-	if ( i<1 || i>N || j<1 || j>N ) return;
+	//if (i<1 || i>N || j<1 || j>N) return;
 
-	if ( mouse_down[0] ) {
+	//if ( !mouse_down[0] && !mouse_down[2] ) return;
+
+	if ( mouse_down[0] ) 
+	{
 		u[IX(i, j)] = force*(mx - omx);
 		v[IX(i, j)] = force*(omy - my);
+
+		x = (float)((float)i / 64);
+		y = (float)((float)j / 64);
+
+		int i, size = pVector.size();
+
+		for (i = 0; i<size; i++)
+		{
+
+			MousePos[0] = x;
+			MousePos[1] = y;
+
+			float xDis = pVector[i]->m_Position[0] - MousePos[0];
+			float yDis = pVector[i]->m_Position[1] - MousePos[1];
+
+			float distance = xDis*xDis + yDis*yDis;
+
+			if (distance < 0.01)
+			{
+				particleSelected = i;
+			}
+
+			//particle is selected
+			if (particleSelected == i)
+			{
+				mouses[i]->getMouse(MousePos);
+				mouses[i]->setForce(true);
+				mouses[i]->apply();
+			}
+			else
+			{
+				mouses[i]->getMouse(pVector[i]->m_Position);
+				mouses[i]->setForce(false);
+			}
+
+		}
+	}
+	else
+	{
+		particleSelected = -1;
+		int i, size = pVector.size();
+
+		for (i = 0; i < size; i++)
+		{
+			mouses[i]->getMouse(pVector[i]->m_Position);
+			mouses[i]->setForce(false);
+		}
 	}
 
 	if (mouse_down[2] && buttonW == 1)
@@ -414,8 +520,10 @@ void twoWayCoupling()
 static void idle_func ( void )
 {
 	get_from_UI( dens_prev, u_prev, v_prev );
+	//euler = 1, midpoint = 2 and runge-kutta = 3
+	simulation_step(pVector, forces, constraints, dt, 1);
 	MoveObjects();
-	twoWayCoupling();
+	//twoWayCoupling();
 	solver->velStep(u, v, u_prev, v_prev, object, movings);
 	solver->densStep(dens, dens_prev, u, v, object, movings);
 	
@@ -448,7 +556,9 @@ static void display_func ( void )
 			movings[i]->draw( true );
 		}
 	}
-	
+
+	draw_forces();
+	draw_particles();
 
 	post_display ();
 }

@@ -88,16 +88,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CalculateForces.cpp" />
+    <ClCompile Include="CircularWireConstraint.cpp" />
     <ClCompile Include="FieldToolbox.cpp" />
+    <ClCompile Include="Gravity.cpp" />
     <ClCompile Include="imageio.cpp" />
+    <ClCompile Include="LinearSolver.cpp" />
+    <ClCompile Include="MouseForce.cpp" />
     <ClCompile Include="MovingObject.cpp" />
+    <ClCompile Include="Particle.cpp" />
+    <ClCompile Include="ParticleSolver.cpp" />
+    <ClCompile Include="Schemes.cpp" />
     <ClCompile Include="Solver.cpp" />
     <ClCompile Include="StableFluids.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CircularWireConstraint.h" />
+    <ClInclude Include="Constraint.h" />
     <ClInclude Include="FieldToolbox.h" />
+    <ClInclude Include="Force.h" />
+    <ClInclude Include="Gravity.h" />
     <ClInclude Include="imageio.h" />
+    <ClInclude Include="linearSolver.h" />
+    <ClInclude Include="MouseForce.h" />
     <ClInclude Include="MovingObject.h" />
+    <ClInclude Include="Particle.h" />
     <ClInclude Include="Solver.h" />
   </ItemGroup>
   <ItemGroup>
