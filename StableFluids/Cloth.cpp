@@ -9,6 +9,17 @@ using namespace std;
 Cloth::Cloth(vector<Particle*> pVector)
 	: m_Vectors(pVector)
 {
+	if (m_Vectors.size() == 4)
+	{
+		m_Corners = m_Vectors;
+	}
+	if (m_Vectors.size() == 9)
+	{
+		m_Corners.push_back(m_Vectors[0]);
+		m_Corners.push_back(m_Vectors[2]);
+		m_Corners.push_back(m_Vectors[8]);
+		m_Corners.push_back(m_Vectors[6]);
+	}
 }
 
 void Cloth::draw(bool show)
@@ -17,10 +28,10 @@ void Cloth::draw(bool show)
 	glColor3f(0.0, 0.0, 1.0);
 	if (show)
 	{
-		glVertex2f(m_Vectors[0]->m_Position[0], m_Vectors[0]->m_Position[1]);
-		glVertex2f(m_Vectors[1]->m_Position[0], m_Vectors[1]->m_Position[1]);
-		glVertex2f(m_Vectors[2]->m_Position[0], m_Vectors[2]->m_Position[1]);
-		glVertex2f(m_Vectors[3]->m_Position[0], m_Vectors[3]->m_Position[1]);
+		//glVertex2f(m_Vectors[0]->m_Position[0], m_Vectors[0]->m_Position[1]);
+		//glVertex2f(m_Vectors[1]->m_Position[0], m_Vectors[1]->m_Position[1]);
+		//glVertex2f(m_Vectors[2]->m_Position[0], m_Vectors[2]->m_Position[1]);
+		//glVertex2f(m_Vectors[3]->m_Position[0], m_Vectors[3]->m_Position[1]);
 	}
 	glEnd();
 
@@ -31,33 +42,34 @@ bool Cloth::pnpoly(int nvert, float testx, float testy)
 {
 	int i, j, c = 0;
 	for (i = 0, j = nvert - 1; i < nvert; j = i++) {
-		if ((((m_Vectors[i]->m_Position[1] * 64)>testy) != ((m_Vectors[j]->m_Position[1] * 64)>testy)) &&
-			(testx < ((m_Vectors[j]->m_Position[0] * 64) - (m_Vectors[i]->m_Position[0] * 64)) *
-			(testy - (m_Vectors[i]->m_Position[1] * 64)) / ((m_Vectors[j]->m_Position[1] * 64) -
-			(m_Vectors[i]->m_Position[1] * 64)) + (m_Vectors[i]->m_Position[0] * 64)))
+		if ((((m_Corners[i]->m_Position[1] * 64)>testy) != ((m_Corners[j]->m_Position[1] * 64)>testy)) &&
+			(testx < ((m_Corners[j]->m_Position[0] * 64) - (m_Corners[i]->m_Position[0] * 64)) *
+			(testy - (m_Corners[i]->m_Position[1] * 64)) / ((m_Corners[j]->m_Position[1] * 64) -
+			(m_Corners[i]->m_Position[1] * 64)) + (m_Corners[i]->m_Position[0] * 64)))
 			c = !c;
 	}
 	return c;
 }
 
+//we do make the assumption all particles move at a similar speed
 float Cloth::GetVelXRight(int x, int y, float u[])
 {
-	return -u[IX_DIM(x + 1, y)] + ((m_Vectors[0]->m_Velocity[0] * 10) > 0 ? (m_Vectors[0]->m_Velocity[0] * 10) : 0);
+	return -u[IX_DIM(x + 1, y)] + ((m_Corners[0]->m_Velocity[0] * 5) > 0 ? (m_Corners[0]->m_Velocity[0] * 5) : 0);
 }
 
 float Cloth::GetVelXLeft(int x, int y, float u[])
 {
-	return -u[IX_DIM(x - 1, y)] + ((m_Vectors[2]->m_Velocity[0] * 10) > 0 ? 0 : (m_Vectors[2]->m_Velocity[0] * 10));
+	return -u[IX_DIM(x - 1, y)] + ((m_Corners[2]->m_Velocity[0] * 5) > 0 ? 0 : (m_Corners[2]->m_Velocity[0] * 5));
 }
 
 float Cloth::GetVelYUp(int x, int y, float v[])
 {
-	return -v[IX_DIM(x, y - 1)] + ((m_Vectors[0]->m_Velocity[1] * 10) > 0 ? 0 : (m_Vectors[0]->m_Velocity[1] * 10));
+	return -v[IX_DIM(x, y - 1)] + ((m_Corners[0]->m_Velocity[1] * 5) > 0 ? 0 : (m_Corners[0]->m_Velocity[1] * 5));
 }
 
 float Cloth::GetVelYDown(int x, int y, float v[])
 {
-	return -v[IX_DIM(x, y + 1)] + ((m_Vectors[2]->m_Velocity[1] * 10) > 0 ? (m_Vectors[2]->m_Velocity[1] * 10) : 0);
+	return -v[IX_DIM(x, y + 1)] + ((m_Corners[2]->m_Velocity[1] * 5) > 0 ? (m_Corners[2]->m_Velocity[1] * 5) : 0);
 }
 
 float Cloth::GetVelocityDensityXRight(int x, int y, float d[])

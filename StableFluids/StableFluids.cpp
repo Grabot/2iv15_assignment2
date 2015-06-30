@@ -115,33 +115,96 @@ static int allocate_data ( void )
 	ySpeed[1] = 0.00;
 	rotation[1] = -1;
 
+	const double dist = 0.2;
+
+	level_start_time = timeGetTime();
+
+	int clothWidth = 3;
+	int clothHeight = 3;
+	int ks = 2;
+	int kd = 2;
+	float distance = 0.2;
+	float heigthOff = 0.2;
+	float clothDist = 0.2f;
 	int particleID = 0;
-	pVector.push_back(new Particle(Vec2f(0.4, 0.4), 1.0f, particleID++, 0));
-	pVector.push_back(new Particle(Vec2f(0.4, 0.6), 1.0f, particleID++, 0));
-	pVector.push_back(new Particle(Vec2f(0.6, 0.6), 1.0f, particleID++, 0));
-	pVector.push_back(new Particle(Vec2f(0.6, 0.4), 1.0f, particleID++, 0));
+
+	for (int i = 0; i < clothWidth*clothHeight; i++)
+	{
+		if (i % clothWidth == 0)
+		{
+			heigthOff += 0.2;
+			distance = 0.0;
+		}
+
+		pVector.push_back(new Particle(Vec2f(0.3 + distance, 0.9 - heigthOff), 1.0f, particleID++, 0));
+		distance += 0.2;
+	}
+	// You shoud replace these with a vector generalized forces and one of
+	// constraints...
+
 	int i, sizeP = pVector.size();
+
 	for (i = 0; i<sizeP; i++)
 	{
 		mouses.push_back(new MouseForce(pVector[i], pVector[i]->m_Velocity, 0.5, 0.5));
 	}
+
+	//connect particles to the one next to him vertically
+	for (int i = 0; i < (clothWidth*clothHeight) - clothWidth; i++)
+	{
+		forces.push_back(new SpringForce(pVector[i], pVector[i + clothWidth], clothDist, ks, kd, 0));
+	}
+
+	//connect particles with the one below him
+	for (int i = 0; i < clothHeight; i++)
+	{
+		for (int j = 0; j < clothWidth - 1; j++)
+		{
+			forces.push_back(new SpringForce(pVector[j + (clothWidth * i)], pVector[j + (clothWidth * i) + 1], clothDist, ks, kd, 0));
+		}
+	}
+
+	//connects vertically particles with the particle after it's next one
+	for (int i = 0; i < clothHeight; i++)
+	{
+		for (int j = 0; j < clothWidth - 2; j++)
+		{
+			forces.push_back(new SpringForce(pVector[j + (i*clothWidth)], pVector[j + 2 + (i*clothWidth)], clothDist * 2, ks, kd, 0));
+		}
+	}
+
+	//connect horizontally particles with the particle after it's next one
+	for (int i = 0; i < clothHeight - 2; i++)
+	{
+		for (int j = 0; j < clothWidth; j++)
+		{
+			forces.push_back(new SpringForce(pVector[j + (clothWidth*i)], pVector[j + (clothWidth*i) + (clothWidth * 2)], clothDist * 2, ks, kd, 0));
+		}
+	}
+
+	//cross connection left to right
+	float clothDistCross = sqrt(clothDist*clothDist + clothDist*clothDist);
+	for (int i = 0; i < clothWidth - 1; i++)
+	{
+		for (int j = 0; j < clothHeight - 1; j++)
+		{
+			forces.push_back(new SpringForce(pVector[i + (j*clothWidth)], pVector[i + 1 + ((j + 1)*clothWidth)], clothDistCross, ks, kd, 0));
+		}
+	}
+
+	//cross connection right to left
+	for (int i = 0; i < clothWidth - 1; i++)
+	{
+		for (int j = 0; j < clothHeight - 1; j++)
+		{
+			forces.push_back(new SpringForce(pVector[i + 1 + (j*clothWidth)], pVector[i + ((j + 1)*clothWidth)], clothDistCross, ks, kd, 0));
+		}
+	}
+
 	for (i = 0; i<sizeP; i++)
 	{
 		forces.push_back(new DragForce(pVector[i], 0.99));
 	}
-	for (i = 0; i<sizeP; i++)
-	{
-		//forces.push_back(new Gravity(pVector[i], Vec2f(0.0, -0.0981)));
-	}
-
-	forces.push_back(new SpringForce(pVector[0], pVector[1], 0.2, 2, 2, 0));
-	forces.push_back(new SpringForce(pVector[1], pVector[2], 0.2, 2, 2, 0));
-	forces.push_back(new SpringForce(pVector[2], pVector[3], 0.2, 2, 2, 0));
-	forces.push_back(new SpringForce(pVector[3], pVector[0], 0.2, 2, 2, 0));
-	forces.push_back(new SpringForce(pVector[0], pVector[2], 0.283, 2, 2, 0));
-	forces.push_back(new SpringForce(pVector[1], pVector[3], 0.283, 2, 2, 0));
-
-	//constraints.push_back(new CircularWireConstraint(pVector[0], Vec2f(0.5,0.8), 0.3));
 
 	cloth = new Cloth(pVector);
 

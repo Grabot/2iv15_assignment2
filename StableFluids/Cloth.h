@@ -20,4 +20,5 @@ public:
 	float GetVelocityDensityYDown(int x, int y, float d[]);
 
 	vector<Particle*> m_Vectors;
+	vector<Particle*> m_Corners;
 };
