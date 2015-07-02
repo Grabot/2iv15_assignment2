@@ -5,7 +5,7 @@ class MovingObject
 {
 public:
 	MovingObject(Vec2f pos, float size);
-	void draw( bool show );
+	void draw();
 	void MoveStep( float xSpeed, float ySpeed, float rotate );
 	bool pnpoly(int nvert, float testx, float testy);
 	float GetVelXRight(int x, int y, float u[]);
@@ -25,14 +25,6 @@ public:
 	Vec2f objectPos;
 	float m_Size;
 	float m_rotate;
-	float m_x1;
-	float m_x2;
-	float m_x3;
-	float m_x4;
-	float m_y1;
-	float m_y2;
-	float m_y3;
-	float m_y4;
 	float objectX1;
 	float objectX2;
 	float objectX3;

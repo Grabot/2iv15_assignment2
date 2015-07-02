@@ -405,7 +405,6 @@ void Solver::vorticityConfinement(float p[], float k[]) {
 			forces[IX_DIM(i, j)] = abs(toStore);
 
 			sign[IX_DIM(i, j)] = toStore < 0 ? -1 : 1;
-			//            std::cout << "Sign " << sign[IX(i,j)] << " toStore" << toStore << std::endl;
 
 		}
 	}
@@ -419,19 +418,14 @@ void Solver::vorticityConfinement(float p[], float k[]) {
 			float length = sqrt(dwdx * dwdx + dwdy * dwdy);
 
 			if (length != 0){
-				dwdx /= length;
-				dwdy /= length;
+				dwdx /= length/2;
+				dwdy /= length/2;
 			}
-			//                dwdx /= 0.0000001f;
-			//                dwdy /= 0.0000001f;
-			//            }
 
 			float v2 = sign[IX_DIM(i, j)] * forces[IX_DIM(i, j)];
 
 			p[IX_DIM(i, j)] = dwdy * -v2;
 			k[IX_DIM(i, j)] = dwdx * v2;
-			//            Fvc_x[IX(i, j)] = dwdy * -v;
-			//            Fvc_y[IX(i, j)] = dwdx *  v;
 		}
 	}
 

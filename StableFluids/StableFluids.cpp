@@ -108,13 +108,29 @@ void SetupBasic()
 	vor = false;
 }
 
+void SetupBasic2()
+{
+	level_start_time = timeGetTime();
+	mouseVelocity = true;
+	vor = false;
+
+	movings.push_back(new MovingObject(Vec2f(0.3, 0.3), 0.2));
+	xSpeed = new float[movings.size()];
+	xSpeed[0] = -0.02;
+	ySpeed = new float[movings.size()];
+	ySpeed[0] = -0.01;
+	rotation = new float[movings.size()];
+	rotation[0] = 2;
+}
+
+
 void SetupCloth44()
 {
 	const double dist = 0.1;
 
 	level_start_time = timeGetTime();
 	mouseVelocity = false;
-	vor = true;
+	vor = false;
 
 	int clothWidth = 4;
 	int clothHeight = 4;
@@ -225,6 +241,10 @@ static int allocate_data ( int input )
 	if (input == 1)
 	{
 		SetupBasic();
+	}
+	else if (input == 2)
+	{
+		SetupBasic2();
 	}
 	else
 	{
@@ -375,7 +395,7 @@ static void post_display ( void )
 
 	if (((level_elapsed_time - level_start_time) % 1000) <= 16)
 	{
-		cout << "frames per second: " << frame_number << endl;
+		//cout << "frames per second: " << frame_number << endl;
 		frame_number = 0;
 	}
 	frame_number++;
@@ -701,9 +721,6 @@ void MoveObjects()
 			ySpeed[i] = (ySpeed[i] * -1);
 		}
 
-		xSpeed[i] = xSpeed[i] * 0.99;
-		ySpeed[i] = ySpeed[i] * 0.99;
-
 		movings[i]->MoveStep(xSpeed[i], ySpeed[i], rotation[i]);
 	}
 
@@ -763,22 +780,16 @@ static void display_func ( void )
 	if (dvel)
 	{
 		draw_velocity();
-
-		int size = movings.size();
-		for (int i = 0; i < size; i++)
-		{
-			movings[i]->draw( false );
-		}
 	}
 	else
 	{
-		draw_density(); 
+		draw_density();
 		draw_object();
 
 		int size = movings.size();
 		for (int i = 0; i < size; i++)
 		{
-			movings[i]->draw( true );
+			movings[i]->draw();
 		}
 	}
 
@@ -866,10 +877,14 @@ int main ( int argc, char ** argv )
 	printf ( "\t Add densities with the right mouse button\n" );
 	printf ( "\t Add velocities with the left mouse button and dragging the mouse\n" );
 	printf ( "\t Toggle density/velocity display with the 'v' key\n" );
-	printf ( "\t Clear the simulation by pressing the 'c' key\n" );
+	printf("\t Clear the simulation by pressing the 'c' key\n");
+	printf("\t toggle wall drawing by pressing the w key \n");
+	printf("\t toggle density drawing by pressing the e key \n");
 	printf ( "\t Quit by pressing the 'q' key\n" );
 
-	printf("\t for the simulation without objects, particles, or velocity confinement give 1 'c' key\n");
+	printf("\t for simulation without objects or particles give 1 'c' key\n");
+	printf("\t for simulation with a full rigid body give 2 'c' key\n");
+	printf("\t for simulation with particle integration of a 4x4 cloth give 3 'c' key\n");
 
 	int input;
 	cin >> input;

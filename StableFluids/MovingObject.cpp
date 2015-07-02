@@ -10,49 +10,42 @@ std::vector<float> vertx;
 std::vector<float> verty;
 
 MovingObject::MovingObject(Vec2f pos, float size)
-	: m_Pos(pos), objectPos(pos), m_Size(size), m_xSpeed(0), m_ySpeed(0), m_rotate(0), rotation(0),
-	m_x1(pos[0] - (size / 2)), m_x2(pos[0] - (size / 2)), m_x3(pos[0] + (size / 2)), m_x4(pos[0] + (size / 2)),
-	m_y1(pos[1] - (size / 2)), m_y2(pos[1] + (size / 2)), m_y3(pos[1] + (size / 2)), m_y4(pos[1] - (size / 2)),
-	objectX1(pos[0] - (size / 2)), objectX2(pos[0] - (size / 2)), objectX3(pos[0] + (size / 2)), objectX4(pos[0] + (size / 2)),
-	objectY1(pos[1] - (size / 2)), objectY2(pos[1] + (size / 2)), objectY3(pos[1] + (size / 2)), objectY4(pos[1] - (size / 2))
+	: m_Pos(pos), objectPos(pos), m_Size(size)
 {
 }
 
-void MovingObject::draw( bool show )
+void MovingObject::draw()
 {
 	glBegin(GL_POLYGON);
 	glColor3f(0.0, 0.0, 1.0);
-	if (show)
-	{
-		glVertex2f(objectX1, objectY1);
-		glVertex2f(objectX2, objectY2);
-		glVertex2f(objectX3, objectY3);
-		glVertex2f(objectX4, objectY4);
-	}
+	glVertex2f(objectX1, objectY1);
+	glVertex2f(objectX2, objectY2);
+	glVertex2f(objectX3, objectY3);
+	glVertex2f(objectX4, objectY4);
 	glEnd();
 
 }
 
 float MovingObject::returnXLeft()
 {
-	if (m_x1 <= m_x2 && m_x1 <= m_x3 && m_x1 <= m_x4)
+	if (objectX1 <= objectX2 && objectX1 <= objectX3 && objectX1 <= objectX4)
 	{
-		return m_x1;
+		return objectX1;
 	}
 
-	if (m_x2 <= m_x1 && m_x2 <= m_x3 && m_x2 <= m_x4)
+	if (objectX2 <= objectX1 && objectX2 <= objectX3 && objectX2 <= objectX4)
 	{
-		return m_x2;
+		return objectX2;
 	}
 
-	if (m_x3 <= m_x2 && m_x3 <= m_x1 && m_x3 <= m_x4)
+	if (objectX3 <= objectX2 && objectX3 <= objectX1 && objectX3 <= objectX4)
 	{
-		return m_x3;
+		return objectX3;
 	}
 
-	if (m_x4 <= m_x2 && m_x4 <= m_x3 && m_x4 <= m_x1)
+	if (objectX4 <= objectX2 && objectX4 <= objectX3 && objectX4 <= objectX1)
 	{
-		return m_x4;
+		return objectX4;
 	}
 
 	return 0.5f;
@@ -60,24 +53,24 @@ float MovingObject::returnXLeft()
 
 float MovingObject::returnXRight()
 {
-	if (m_x1 >= m_x2 && m_x1 >= m_x3 && m_x1 >= m_x4)
+	if (objectX1 >= objectX2 && objectX1 >= objectX3 && objectX1 >= objectX4)
 	{
-		return m_x1;
+		return objectX1;
 	}
 
-	if (m_x2 >= m_x1 && m_x2 >= m_x3 && m_x2 >= m_x4)
+	if (objectX2 >= objectX1 && objectX2 >= objectX3 && objectX2 >= objectX4)
 	{
-		return m_x2;
+		return objectX2;
 	}
 
-	if (m_x3 >= m_x2 && m_x3 >= m_x1 && m_x3 >= m_x4)
+	if (objectX3 >= objectX2 && objectX3 >= objectX1 && objectX3 >= objectX4)
 	{
-		return m_x3;
+		return objectX3;
 	}
 
-	if (m_x4 >= m_x2 && m_x4 >= m_x3 && m_x4 >= m_x1)
+	if (objectX4 >= objectX2 && objectX4 >= objectX3 && objectX4 >= objectX1)
 	{
-		return m_x4;
+		return objectX4;
 	}
 
 	return 0.5f;
@@ -85,24 +78,24 @@ float MovingObject::returnXRight()
 
 float MovingObject::returnYTop()
 {
-	if (m_y1 >= m_y2 && m_y1 >= m_y3 && m_y1 >= m_y4)
+	if (objectY1 >= objectY2 && objectY1 >= objectY3 && objectY1 >= objectY4)
 	{
-		return m_y1;
+		return objectY1;
 	}
 
-	if (m_y2 >= m_y1 && m_y2 >= m_y3 && m_y2 >= m_y4)
+	if (objectY2 >= objectY1 && objectY2 >= objectY3 && objectY2 >= objectY4)
 	{
-		return m_y2;
+		return objectY2;
 	}
 
-	if (m_y3 >= m_y2 && m_y3 >= m_y1 && m_y3 >= m_y4)
+	if (objectY3 >= objectY2 && objectY3 >= objectY1 && objectY3 >= objectY4)
 	{
-		return m_y3;
+		return objectY3;
 	}
 
-	if (m_y4 >= m_y2 && m_y4 >= m_y3 && m_y4 >= m_y1)
+	if (objectY4 >= objectY2 && objectY4 >= objectY3 && objectY4 >= objectY1)
 	{
-		return m_y4;
+		return objectY4;
 	}
 
 	return 0.5f;
@@ -110,24 +103,24 @@ float MovingObject::returnYTop()
 
 float MovingObject::returnYBottom()
 {
-	if (m_y1 <= m_y2 && m_y1 <= m_y3 && m_y1 <= m_y4)
+	if (objectY1 <= objectY2 && objectY1 <= objectY3 && objectY1 <= objectY4)
 	{
-		return m_y1;
+		return objectY1;
 	}
 
-	if (m_y2 <= m_y1 && m_y2 <= m_y3 && m_y2 <= m_y4)
+	if (objectY2 <= objectY1 && objectY2 <= objectY3 && objectY2 <= objectY4)
 	{
-		return m_y2;
+		return objectY2;
 	}
 
-	if (m_y3 <= m_y2 && m_y3 <= m_y1 && m_y3 <= m_y4)
+	if (objectY3 <= objectY2 && objectY3 <= objectY1 && objectY3 <= objectY4)
 	{
-		return m_y3;
+		return objectY3;
 	}
 
-	if (m_y4 <= m_y2 && m_y4 <= m_y3 && m_y4 <= m_y1)
+	if (objectY4 <= objectY2 && objectY4 <= objectY3 && objectY4 <= objectY1)
 	{
-		return m_y4;
+		return objectY4;
 	}
 
 	return 0.5f;
@@ -141,26 +134,16 @@ void MovingObject::MoveStep( float xSpeed, float ySpeed, float rotate )
 	m_Pos[0] = m_Pos[0] + m_xSpeed;
 	m_Pos[1] = m_Pos[1] + m_ySpeed;
 
-	m_x1 += m_xSpeed;
-	m_x2 += m_xSpeed;
-	m_x3 += m_xSpeed;
-	m_x4 += m_xSpeed;
-
-	m_y1 += m_ySpeed;
-	m_y2 += m_ySpeed;
-	m_y3 += m_ySpeed;
-	m_y4 += m_ySpeed;
-
 	rotation += rotate;
 
-	objectX1 = ((m_x1 - m_Pos[0])*cos(rotation*PI / 180) - (m_y1 - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
-	objectY1 = ((m_x1 - m_Pos[0])*sin(rotation*PI / 180) + (m_y1 - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);
-	objectX2 = ((m_x2 - m_Pos[0])*cos(rotation*PI / 180) - (m_y2 - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
-	objectY2 = ((m_x2 - m_Pos[0])*sin(rotation*PI / 180) + (m_y2 - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);
-	objectX3 = ((m_x3 - m_Pos[0])*cos(rotation*PI / 180) - (m_y3 - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
-	objectY3 = ((m_x3 - m_Pos[0])*sin(rotation*PI / 180) + (m_y3 - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);
-	objectX4 = ((m_x4 - m_Pos[0])*cos(rotation*PI / 180) - (m_y4 - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
-	objectY4 = ((m_x4 - m_Pos[0])*sin(rotation*PI / 180) + (m_y4 - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);
+	objectX1 = ((m_Pos[0] - (m_Size / 2) - m_Pos[0])*cos(rotation*PI / 180) - (m_Pos[1] - (m_Size / 2) - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
+	objectY1 = ((m_Pos[0] - (m_Size / 2) - m_Pos[0])*sin(rotation*PI / 180) + (m_Pos[1] - (m_Size / 2) - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);
+	objectX2 = ((m_Pos[0] - (m_Size / 2) - m_Pos[0])*cos(rotation*PI / 180) - (m_Pos[1] + (m_Size / 2) - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
+	objectY2 = ((m_Pos[0] - (m_Size / 2) - m_Pos[0])*sin(rotation*PI / 180) + (m_Pos[1] + (m_Size / 2) - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);
+	objectX3 = ((m_Pos[0] + (m_Size / 2) - m_Pos[0])*cos(rotation*PI / 180) - (m_Pos[1] + (m_Size / 2) - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
+	objectY3 = ((m_Pos[0] + (m_Size / 2) - m_Pos[0])*sin(rotation*PI / 180) + (m_Pos[1] + (m_Size / 2) - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);
+	objectX4 = ((m_Pos[0] + (m_Size / 2) - m_Pos[0])*cos(rotation*PI / 180) - (m_Pos[1] - (m_Size / 2) - m_Pos[1])*sin(rotation*PI / 180) + m_Pos[0]);
+	objectY4 = ((m_Pos[0] + (m_Size / 2) - m_Pos[0])*sin(rotation*PI / 180) + (m_Pos[1] - (m_Size / 2) - m_Pos[1])*cos(rotation*PI / 180) + m_Pos[1]);
 
 }
 

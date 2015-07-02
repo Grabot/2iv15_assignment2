@@ -3,6 +3,8 @@
 #include "Particle.h"
 #include <list>
 #include <vector>
+#include <iostream>
+using namespace std;
 
 class Cloth
 {
